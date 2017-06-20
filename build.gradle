@@ -1,0 +1,20 @@
+group 'su.nlq'
+version '0.1'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile group: 'org.jetbrains', name: 'annotations', version: '15.0'
+
+  compile group: 'io.vertx', name: 'vertx-core', version: '3.4.1'
+  compile group: 'io.vertx', name: 'vertx-web', version: '3.4.1'
+
+  compile group: 'io.prometheus', name: 'simpleclient', version: '0.0.23'
+  compile group: 'io.prometheus', name: 'simpleclient_servlet', version: '0.0.23'
+}
