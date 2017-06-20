@@ -12,11 +12,14 @@ import java.util.EnumSet;
 
 public final class VertxPrometheusOptions extends MetricsOptions {
 
+  private static final @NotNull String DEFAULT_HOST = "localhost";
+  private static final int DEFAULT_PORT = 9090;
+
   private final @NotNull EnumSet<MetricsType> metrics = EnumSet.allOf(MetricsType.class);
 
   private @NotNull CollectorRegistry registry = CollectorRegistry.defaultRegistry;
-  private @NotNull String host = "localhost";
-  private int port = 9090;
+  private @NotNull String host = DEFAULT_HOST;
+  private int port = DEFAULT_PORT;
 
   public VertxPrometheusOptions() {
     super();
