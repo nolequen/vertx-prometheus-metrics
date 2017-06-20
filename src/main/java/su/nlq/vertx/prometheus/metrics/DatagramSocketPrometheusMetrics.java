@@ -9,9 +9,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class DatagramSocketPrometheusMetrics extends PrometheusMetrics implements DatagramSocketMetrics {
-  private final @NotNull Counter counter = Counter.build("vertx_datagram_socket", "Datagram socket metrics").labelNames("type", "address").create();
+  private final @NotNull Counter counter = Counter.build("vertx_datagram_socket", "Datagram socket metrics")
+      .labelNames("type", "local_address", "remote_address").create();
 
-  private volatile @Nullable SocketAddress address;
+  private volatile @Nullable SocketAddress namedLocalAddress;
 
   public DatagramSocketPrometheusMetrics(@NotNull CollectorRegistry registry) {
     super(registry);
@@ -20,21 +21,21 @@ public final class DatagramSocketPrometheusMetrics extends PrometheusMetrics imp
 
   @Override
   public void listening(@NotNull String localName, @NotNull SocketAddress localAddress) {
-    this.address = new SocketAddressImpl(localAddress.port(), localName);
+    this.namedLocalAddress = new SocketAddressImpl(localAddress.port(), localName);
   }
 
   @Override
-  public void bytesRead(@NotNull Void socketMetric, @NotNull SocketAddress remoteAddress, long numberOfBytes) {
-    counter.labels("received", String.valueOf(address)).inc(numberOfBytes);
+  public void bytesRead(@Nullable Void socketMetric, @NotNull SocketAddress remoteAddress, long numberOfBytes) {
+    counter.labels("received", String.valueOf(namedLocalAddress), remoteAddress.toString()).inc(numberOfBytes);
   }
 
   @Override
-  public void bytesWritten(@NotNull Void socketMetric, @NotNull SocketAddress remoteAddress, long numberOfBytes) {
-    counter.labels("sent", remoteAddress.toString()).inc(numberOfBytes);
+  public void bytesWritten(@Nullable Void socketMetric, @NotNull SocketAddress remoteAddress, long numberOfBytes) {
+    counter.labels("sent", String.valueOf(namedLocalAddress), remoteAddress.toString()).inc(numberOfBytes);
   }
 
   @Override
-  public void exceptionOccurred(@NotNull Void socketMetric, @NotNull SocketAddress remoteAddress, @NotNull Throwable t) {
-    counter.labels("errors", remoteAddress.toString()).inc();
+  public void exceptionOccurred(@Nullable Void socketMetric, @NotNull SocketAddress remoteAddress, @NotNull Throwable throwable) {
+    counter.labels("errors", String.valueOf(namedLocalAddress), remoteAddress.toString()).inc();
   }
 }

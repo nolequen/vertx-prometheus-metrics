@@ -8,7 +8,7 @@ import io.vertx.core.spi.metrics.EventBusMetrics;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class EventBusPrometheusMetrics extends PrometheusMetrics implements EventBusMetrics<EventBusPrometheusMetrics.EventBuMetric> {
+public final class EventBusPrometheusMetrics extends PrometheusMetrics implements EventBusMetrics<EventBusPrometheusMetrics.Metric> {
 
   private static final @NotNull Gauge handlers = Gauge.build("vertx_eventbus_handlers", "Message subscriptions number")
       .labelNames("address").create();
@@ -35,35 +35,35 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
   }
 
   @Override
-  public @NotNull EventBuMetric handlerRegistered(@NotNull String address, @NotNull String repliedAddress) {
+  public @NotNull Metric handlerRegistered(@NotNull String address, @Nullable String repliedAddress) {
     handlers.labels(address).inc();
-    return new EventBuMetric(address);
+    return new Metric(address);
   }
 
 
   @Override
-  public void handlerUnregistered(@NotNull EventBuMetric handler) {
-    handlers.labels(handler.address).dec();
+  public void handlerUnregistered(@NotNull Metric metric) {
+    handlers.labels(metric.address).dec();
   }
 
   @Override
-  public void scheduleMessage(@NotNull EventBuMetric handler, boolean local) {
-    messages.labels(local ? "local" : "remote", "scheduled", handler.address).inc();
+  public void scheduleMessage(@NotNull Metric metric, boolean local) {
+    messages.labels(local ? "local" : "remote", "scheduled", metric.address).inc();
   }
 
   @Override
-  public void beginHandleMessage(@NotNull EventBuMetric handler, boolean local) {
+  public void beginHandleMessage(@NotNull Metric metric, boolean local) {
     final String range = local ? "local" : "remote";
-    final String address = handler.address;
+    final String address = metric.address;
     messages.labels(range, "pending", address).dec();
     messages.labels(range, "scheduled", address).dec();
-    handler.stopwatch.reset();
+    metric.stopwatch.reset();
   }
 
   @Override
-  public void endHandleMessage(@NotNull EventBuMetric handler, @Nullable Throwable failure) {
-    final String address = handler.address;
-    time.labels(address).inc(handler.stopwatch.stop());
+  public void endHandleMessage(@NotNull Metric metric, @Nullable Throwable failure) {
+    final String address = metric.address;
+    time.labels(address).inc(metric.stopwatch.stop());
     if (failure != null) {
       failures.labels(address, "request", failure.getClass().getSimpleName()).inc();
     }
@@ -99,11 +99,11 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
     failures.labels(address, "reply", failure.name()).inc();
   }
 
-  public static final class EventBuMetric {
+  public static final class Metric {
     private final @NotNull String address;
     private final @NotNull Stopwatch stopwatch = new Stopwatch();
 
-    public EventBuMetric(@NotNull String address) {
+    public Metric(@NotNull String address) {
       this.address = address;
     }
   }

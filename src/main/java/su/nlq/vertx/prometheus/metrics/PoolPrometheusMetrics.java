@@ -6,8 +6,6 @@ import io.prometheus.client.Gauge;
 import io.vertx.core.spi.metrics.PoolMetrics;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.TimeUnit;
-
 public final class PoolPrometheusMetrics extends PrometheusMetrics implements PoolMetrics<Stopwatch> {
   private final @NotNull String type;
   private final @NotNull String name;
@@ -42,15 +40,13 @@ public final class PoolPrometheusMetrics extends PrometheusMetrics implements Po
   public @NotNull Stopwatch begin(@NotNull Stopwatch submittedStopwatch) {
     states.labels(type, name, "queued").dec();
     states.labels(type, name, "used").inc();
-
     time.labels(type, name, "delay").inc(submittedStopwatch.stop());
     return submittedStopwatch;
   }
 
   @Override
   public void end(@NotNull Stopwatch beginStopwatch, boolean succeeded) {
-    time.labels(type, name, "usage").inc(TimeUnit.NANOSECONDS.toMicros(beginStopwatch.stop()));
-
+    time.labels(type, name, "process").inc(beginStopwatch.stop());
     states.labels(type, name, "used").dec();
   }
 }

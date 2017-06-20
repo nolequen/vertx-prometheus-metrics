@@ -175,7 +175,7 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
     @Override
     public void created(long id) {
       collector.labels("created").inc();
-      collector.labels("current").inc();
+      collector.labels("active").inc();
     }
 
     @Override
@@ -184,7 +184,7 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
         collector.labels("cancelled").inc();
       }
       collector.labels("destroyed").inc();
-      collector.labels("current").dec();
+      collector.labels("active").dec();
     }
   }
 
