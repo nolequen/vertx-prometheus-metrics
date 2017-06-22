@@ -8,10 +8,15 @@ import io.vertx.core.spi.metrics.EventBusMetrics;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 public final class EventBusPrometheusMetrics extends PrometheusMetrics implements EventBusMetrics<EventBusPrometheusMetrics.Metric> {
 
-  private static final @NotNull Gauge handlers = Gauge.build("vertx_eventbus_handlers", "Message subscriptions number")
+  private static final @NotNull Gauge handlers = Gauge.build("vertx_eventbus_handlers", "Message handlers number")
       .labelNames("address").create();
+
+  private static final @NotNull Gauge respondents = Gauge.build("vertx_eventbus_respondents", "Reply handlers number")
+      .labelNames("handler_address").create();
 
   private static final @NotNull Gauge messages = Gauge.build("vertx_eventbus_messages", "EventBus messages metrics")
       .labelNames("range", "status", "address").create();
@@ -28,6 +33,7 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
   public EventBusPrometheusMetrics(@NotNull CollectorRegistry registry) {
     super(registry);
     register(handlers);
+    register(respondents);
     register(messages);
     register(failures);
     register(time);
@@ -37,13 +43,16 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
   @Override
   public @NotNull Metric handlerRegistered(@NotNull String address, @Nullable String repliedAddress) {
     handlers.labels(address).inc();
-    return new Metric(address);
+    final Optional<String> respondent = Optional.ofNullable(repliedAddress);
+    respondent.ifPresent(r -> respondents.labels(address).inc());
+    return new Metric(address, respondent);
   }
 
 
   @Override
   public void handlerUnregistered(@NotNull Metric metric) {
     handlers.labels(metric.address).dec();
+    metric.respondent.ifPresent(r -> respondents.labels(metric.address).dec());
   }
 
   @Override
@@ -101,10 +110,12 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
 
   public static final class Metric {
     private final @NotNull String address;
+    private final @NotNull Optional<String> respondent;
     private final @NotNull Stopwatch stopwatch = new Stopwatch();
 
-    public Metric(@NotNull String address) {
+    public Metric(@NotNull String address, @NotNull Optional<String> respondent) {
       this.address = address;
+      this.respondent = respondent;
     }
   }
 }
