@@ -27,7 +27,7 @@ public abstract class PrometheusMetrics implements Metrics {
     collectors.clear();
   }
 
-  protected final void register(@NotNull Collector collector) {
+  public final void register(@NotNull Collector collector) {
     try {
       registry.register(collector);
       collectors.add(collector);

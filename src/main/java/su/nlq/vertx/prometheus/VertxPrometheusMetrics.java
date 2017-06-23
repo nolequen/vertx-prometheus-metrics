@@ -82,7 +82,7 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
   @Override
   public @NotNull HttpClientMetrics<?, ?, ?, ?, ?> createMetrics(@NotNull HttpClient client, @NotNull HttpClientOptions httpClientOptions) {
     return options.isEnabled(HTTPClient)
-        ? new HTTPClientPrometheusMetrics(options.getRegistry())
+        ? new HTTPClientPrometheusMetrics(options.getRegistry(), httpClientOptions.getLocalAddress())
         : super.createMetrics(client, httpClientOptions);
   }
 
@@ -96,7 +96,7 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
   @Override
   public @NotNull TCPMetrics<?> createMetrics(@NotNull NetClient client, @NotNull NetClientOptions netClientOptions) {
     return options.isEnabled(NetClient)
-        ? new NetClientPrometheusMetrics(options.getRegistry())
+        ? new NetClientPrometheusMetrics(options.getRegistry(), netClientOptions.getLocalAddress())
         : super.createMetrics(client, netClientOptions);
   }
 

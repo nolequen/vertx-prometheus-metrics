@@ -3,30 +3,22 @@ package su.nlq.vertx.prometheus.metrics;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
-import io.vertx.core.http.WebSocket;
+import io.vertx.core.http.*;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
 import org.jetbrains.annotations.NotNull;
 
-public final class HTTPClientPrometheusMetrics extends PrometheusMetrics implements HttpClientMetrics<RequestMetric, SocketAddress, SocketAddress, SocketAddress, Stopwatch> {
+public final class HTTPClientPrometheusMetrics extends TCPPrometheusMetrics implements HttpClientMetrics<HTTPClientPrometheusMetrics.RequestMetric, SocketAddress, SocketAddress, SocketAddress, Stopwatch> {
 
-  private static final @NotNull Gauge connections = Gauge.build("vertx_httpclient_connections", "HTTP client active connections number")
-      .labelNames("remote_address", "type").create();
-
-  private static final @NotNull Counter bytes = Counter.build("vertx_httpclient_bytes", "HTTP client read/write bytes")
-      .labelNames("remote_address", "operation").create();
-
-  private static final @NotNull Counter errors = Counter.build("vertx_httpclient_errors", "HTTP client errors number")
-      .labelNames("remote_address", "class").create();
+  private static final @NotNull Gauge websockets = Gauge.build("vertx_httpserver_websockets", "HTTP client websockets number")
+      .labelNames("local_address", "remote_address").create();
 
   private static final @NotNull Gauge requests = Gauge.build("vertx_httpclient_requests", "HTTP client requests number")
-      .labelNames("local_address", "remote_address", "state").create();
+      .labelNames("local_address", "remote_address", "method", "path", "state").create();
 
   private static final @NotNull Counter requestTime = Counter.build("vertx_httpclient_request_time", "HTTP client request/response processing time (μs)")
-      .labelNames("operation", "local_address", "remote_address").create();
+      .labelNames("local_address", "remote_address").create();
 
   private static final @NotNull Gauge endpoints = Gauge.build("vertx_endpoints", "Endpoints metrics")
       .labelNames("address", "counter").create();
@@ -34,11 +26,11 @@ public final class HTTPClientPrometheusMetrics extends PrometheusMetrics impleme
   private static final @NotNull Gauge endpointQueueTime = Gauge.build("vertx_endpoint_queue_time", "Endpoint queue time")
       .labelNames("address").create();
 
-  public HTTPClientPrometheusMetrics(@NotNull CollectorRegistry registry) {
-    super(registry);
-    register(connections);
-    register(bytes);
-    register(errors);
+  private final @NotNull String localAddress;
+
+  public HTTPClientPrometheusMetrics(@NotNull CollectorRegistry registry, @NotNull String localAddress) {
+    super(registry, "httpclient", localAddress);
+    this.localAddress = localAddress;
     register(requests);
     register(requestTime);
     register(endpoints);
@@ -65,25 +57,13 @@ public final class HTTPClientPrometheusMetrics extends PrometheusMetrics impleme
 
   @Override
   public @NotNull SocketAddress connected(@NotNull SocketAddress endpoint, @NotNull SocketAddress namedRemoteAddress, @NotNull WebSocket webSocket) {
-    connections.labels(namedRemoteAddress.toString(), "websocket").inc();
+    websockets.labels(localAddress, namedRemoteAddress.toString()).inc();
     return namedRemoteAddress;
   }
 
   @Override
   public void disconnected(@NotNull SocketAddress namedRemoteAddress) {
-    connections.labels(namedRemoteAddress.toString(), "websocket").dec();
-  }
-
-  @Override
-  public @NotNull SocketAddress connected(@NotNull SocketAddress remoteAddress, @NotNull String remoteName) {
-    final SocketAddress namedRemoteAddress = new SocketAddressImpl(remoteAddress.port(), remoteName);
-    connections.labels(namedRemoteAddress.toString(), "tcp").inc();
-    return namedRemoteAddress;
-  }
-
-  @Override
-  public void disconnected(@NotNull SocketAddress namedRemoteAddress, @NotNull SocketAddress remoteAddress) {
-    connections.labels(namedRemoteAddress.toString(), "tcp").dec();
+    websockets.labels(localAddress, namedRemoteAddress.toString()).dec();
   }
 
   @Override
@@ -100,19 +80,19 @@ public final class HTTPClientPrometheusMetrics extends PrometheusMetrics impleme
 
   @Override
   public @NotNull RequestMetric requestBegin(@NotNull SocketAddress endpoint, @NotNull SocketAddress namedRemoteAddress, @NotNull SocketAddress localAddress, @NotNull SocketAddress remoteAddress, @NotNull HttpClientRequest request) {
-    requests.labels(localAddress.toString(), namedRemoteAddress.toString(), "active").inc();
-    requests.labels(localAddress.toString(), namedRemoteAddress.toString(), "total").inc();
-    return new RequestMetric(localAddress, namedRemoteAddress);
+    requests.labels(localAddress.toString(), namedRemoteAddress.toString(), request.method().name(), request.path(), "active").inc();
+    requests.labels(localAddress.toString(), namedRemoteAddress.toString(), request.method().name(), request.path(), "total").inc();
+    return new RequestMetric(localAddress, namedRemoteAddress, request);
   }
 
   @Override
   public void requestReset(@NotNull RequestMetric requestMetric) {
-    requests.labels(requestMetric.getLocalAddress().toString(), requestMetric.getRemoteAddress().toString(), "active").dec();
+    requests.labels(requestMetric.localAddress.toString(), requestMetric.remoteAddress.toString(), requestMetric.method.name(), requestMetric.path, "active").dec();
   }
 
   @Override
   public void requestEnd(@NotNull RequestMetric requestMetric) {
-    requestTime.labels("request", requestMetric.getLocalAddress().toString(), requestMetric.getRemoteAddress().toString()).inc(requestMetric.getStopwatch().stop());
+    requestTime.labels(requestMetric.localAddress.toString(), requestMetric.remoteAddress.toString(), requestMetric.method.name(), requestMetric.path).inc(requestMetric.stopwatch.stop());
   }
 
   @Override
@@ -122,27 +102,27 @@ public final class HTTPClientPrometheusMetrics extends PrometheusMetrics impleme
 
   @Override
   public void responseBegin(@NotNull RequestMetric requestMetric, @NotNull HttpClientResponse response) {
-    requestMetric.getStopwatch().reset();
+    requestMetric.stopwatch.reset();
   }
 
   @Override
   public void responseEnd(@NotNull RequestMetric requestMetric, @NotNull HttpClientResponse response) {
-    requestTime.labels("response", requestMetric.getLocalAddress().toString(), requestMetric.getRemoteAddress().toString()).inc(requestMetric.getStopwatch().stop());
-    requests.labels(requestMetric.getLocalAddress().toString(), requestMetric.getRemoteAddress().toString(), "active").dec();
+    requestTime.labels(requestMetric.localAddress.toString(), requestMetric.remoteAddress.toString(), requestMetric.method.name(), requestMetric.path).inc(requestMetric.stopwatch.stop());
+    requests.labels(requestMetric.localAddress.toString(), requestMetric.remoteAddress.toString(), requestMetric.method.name(), requestMetric.path, "active").dec();
   }
 
-  @Override
-  public void bytesRead(@NotNull SocketAddress namedRemoteAddress, @NotNull SocketAddress remoteAddress, long numberOfBytes) {
-    bytes.labels(namedRemoteAddress.toString(), "read").inc(numberOfBytes);
-  }
+  public static final class RequestMetric {
+    private final @NotNull SocketAddress localAddress;
+    private final @NotNull SocketAddress remoteAddress;
+    private final @NotNull HttpMethod method;
+    private final @NotNull String path;
+    private final @NotNull Stopwatch stopwatch = new Stopwatch();
 
-  @Override
-  public void bytesWritten(@NotNull SocketAddress namedRemoteAddress, @NotNull SocketAddress remoteAddress, long numberOfBytes) {
-    bytes.labels(namedRemoteAddress.toString(), "write").inc(numberOfBytes);
-  }
-
-  @Override
-  public void exceptionOccurred(@NotNull SocketAddress namedRemoteAddress, @NotNull SocketAddress remoteAddress, @NotNull Throwable throwable) {
-    errors.labels(namedRemoteAddress.toString(), throwable.getClass().getSimpleName()).inc();
+    public RequestMetric(@NotNull SocketAddress localAddress, @NotNull SocketAddress remoteAddress, @NotNull HttpClientRequest request) {
+      this.localAddress = localAddress;
+      this.remoteAddress = remoteAddress;
+      this.method = request.method();
+      this.path = request.path();
+    }
   }
 }
