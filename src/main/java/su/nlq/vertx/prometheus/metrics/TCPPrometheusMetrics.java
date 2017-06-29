@@ -6,17 +6,17 @@ import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.core.spi.metrics.TCPMetrics;
 import org.jetbrains.annotations.NotNull;
 import su.nlq.vertx.prometheus.metrics.counters.BytesCounter;
-import su.nlq.vertx.prometheus.metrics.counters.ConnectionCounter;
+import su.nlq.vertx.prometheus.metrics.counters.ConnectionGauge;
 import su.nlq.vertx.prometheus.metrics.counters.ErrorCounter;
 
 public abstract class TCPPrometheusMetrics extends PrometheusMetrics implements TCPMetrics<SocketAddress> {
-  private final @NotNull ConnectionCounter connections;
+  private final @NotNull ConnectionGauge connections;
   private final @NotNull BytesCounter bytes;
   private final @NotNull ErrorCounter errors;
 
   protected TCPPrometheusMetrics(@NotNull CollectorRegistry registry, @NotNull String name, @NotNull String localAddress) {
     super(registry);
-    connections = new ConnectionCounter(name, localAddress).register(this);
+    connections = new ConnectionGauge(name, localAddress).register(this);
     errors = new ErrorCounter(name, localAddress).register(this);
     bytes = new BytesCounter(name, localAddress).register(this);
   }

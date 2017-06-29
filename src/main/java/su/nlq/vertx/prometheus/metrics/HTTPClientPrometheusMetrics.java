@@ -1,39 +1,37 @@
 package su.nlq.vertx.prometheus.metrics;
 
 import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
-import io.vertx.core.http.*;
+import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.WebSocket;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
 import org.jetbrains.annotations.NotNull;
+import su.nlq.vertx.prometheus.metrics.counters.TimeCounter;
+import su.nlq.vertx.prometheus.metrics.counters.WebsocketGauge;
 
 public final class HTTPClientPrometheusMetrics extends TCPPrometheusMetrics implements HttpClientMetrics<HTTPClientPrometheusMetrics.RequestMetric, SocketAddress, SocketAddress, SocketAddress, Stopwatch> {
-
-  private static final @NotNull Gauge websockets = Gauge.build("vertx_httpserver_websockets", "HTTP client websockets number")
-      .labelNames("local_address", "remote_address").create();
 
   private static final @NotNull Gauge requests = Gauge.build("vertx_httpclient_requests", "HTTP client requests number")
       .labelNames("local_address", "remote_address", "method", "path", "state").create();
 
-  private static final @NotNull Counter requestTime = Counter.build("vertx_httpclient_request_time", "HTTP client request/response processing time (μs)")
-      .labelNames("local_address", "remote_address").create();
-
   private static final @NotNull Gauge endpoints = Gauge.build("vertx_endpoints", "Endpoints metrics")
       .labelNames("address", "counter").create();
 
-  private static final @NotNull Gauge endpointQueueTime = Gauge.build("vertx_endpoint_queue_time", "Endpoint queue time")
-      .labelNames("address").create();
-
-  private final @NotNull String localAddress;
+  private final @NotNull WebsocketGauge websockets;
+  private final @NotNull TimeCounter requestTime;
+  private final @NotNull TimeCounter endpointQueueTime;
 
   public HTTPClientPrometheusMetrics(@NotNull CollectorRegistry registry, @NotNull String localAddress) {
     super(registry, "httpclient", localAddress);
-    this.localAddress = localAddress;
     register(requests);
-    register(requestTime);
     register(endpoints);
+    websockets = new WebsocketGauge("httpclient", localAddress).register(this);
+    requestTime = new TimeCounter("httpclient_request", localAddress).register(this);
+    endpointQueueTime = new TimeCounter("httpclient_endpoint_queue", localAddress).register(this);
   }
 
   @Override
@@ -57,13 +55,13 @@ public final class HTTPClientPrometheusMetrics extends TCPPrometheusMetrics impl
 
   @Override
   public @NotNull SocketAddress connected(@NotNull SocketAddress endpoint, @NotNull SocketAddress namedRemoteAddress, @NotNull WebSocket webSocket) {
-    websockets.labels(localAddress, namedRemoteAddress.toString()).inc();
+    websockets.increment(namedRemoteAddress);
     return namedRemoteAddress;
   }
 
   @Override
   public void disconnected(@NotNull SocketAddress namedRemoteAddress) {
-    websockets.labels(localAddress, namedRemoteAddress.toString()).dec();
+    websockets.decrement(namedRemoteAddress);
   }
 
   @Override
@@ -75,7 +73,7 @@ public final class HTTPClientPrometheusMetrics extends TCPPrometheusMetrics impl
   @Override
   public void dequeueRequest(@NotNull SocketAddress endpoint, @NotNull Stopwatch stopwatch) {
     endpoints.labels(endpoint.toString(), "queue-size").dec();
-    endpointQueueTime.labels(endpoint.toString()).inc(stopwatch.stop());
+    endpointQueueTime.apply(endpoint, stopwatch);
   }
 
   @Override
@@ -92,7 +90,7 @@ public final class HTTPClientPrometheusMetrics extends TCPPrometheusMetrics impl
 
   @Override
   public void requestEnd(@NotNull RequestMetric requestMetric) {
-    requestTime.labels(requestMetric.localAddress.toString(), requestMetric.remoteAddress.toString(), requestMetric.method.name(), requestMetric.path).inc(requestMetric.stopwatch.stop());
+    requestTime.apply(requestMetric.remoteAddress, requestMetric.stopwatch);
   }
 
   @Override
@@ -102,12 +100,13 @@ public final class HTTPClientPrometheusMetrics extends TCPPrometheusMetrics impl
 
   @Override
   public void responseBegin(@NotNull RequestMetric requestMetric, @NotNull HttpClientResponse response) {
+    //todo: response
     requestMetric.stopwatch.reset();
   }
 
   @Override
   public void responseEnd(@NotNull RequestMetric requestMetric, @NotNull HttpClientResponse response) {
-    requestTime.labels(requestMetric.localAddress.toString(), requestMetric.remoteAddress.toString(), requestMetric.method.name(), requestMetric.path).inc(requestMetric.stopwatch.stop());
+    requestTime.apply(requestMetric.remoteAddress, requestMetric.stopwatch);
     requests.labels(requestMetric.localAddress.toString(), requestMetric.remoteAddress.toString(), requestMetric.method.name(), requestMetric.path, "active").dec();
   }
 

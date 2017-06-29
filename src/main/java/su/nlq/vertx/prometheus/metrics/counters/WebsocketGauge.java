@@ -5,25 +5,25 @@ import io.vertx.core.net.SocketAddress;
 import org.jetbrains.annotations.NotNull;
 import su.nlq.vertx.prometheus.metrics.PrometheusMetrics;
 
-public final class ConnectionCounter {
+public final class WebsocketGauge {
   private final @NotNull Gauge gauge;
   private final @NotNull String localAddress;
 
-  public ConnectionCounter(@NotNull String name, @NotNull String localAddress) {
+  public WebsocketGauge(@NotNull String name, @NotNull String localAddress) {
     this.localAddress = localAddress;
-    gauge = Gauge.build("vertx_" + name + "_connections", "Active connections number")
+    gauge = Gauge.build("vertx_" + name + "_websockets", "Websockets number")
         .labelNames("local_address", "remote_address").create();
   }
 
-  public void connected(@NotNull SocketAddress remoteAddress) {
+  public void increment(@NotNull SocketAddress remoteAddress) {
     gauge(remoteAddress).inc();
   }
 
-  public void disconnected(@NotNull SocketAddress remoteAddress) {
-    gauge(remoteAddress).dec();
+  public void decrement(@NotNull SocketAddress remoteAddress) {
+    gauge(remoteAddress).inc();
   }
 
-  public @NotNull ConnectionCounter register(@NotNull PrometheusMetrics metrics) {
+  public @NotNull WebsocketGauge register(@NotNull PrometheusMetrics metrics) {
     metrics.register(gauge);
     return this;
   }

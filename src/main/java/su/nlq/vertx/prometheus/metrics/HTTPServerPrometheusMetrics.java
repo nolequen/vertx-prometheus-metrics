@@ -1,7 +1,6 @@
 package su.nlq.vertx.prometheus.metrics;
 
 import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
@@ -10,25 +9,24 @@ import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.HttpServerMetrics;
 import org.jetbrains.annotations.NotNull;
+import su.nlq.vertx.prometheus.metrics.counters.TimeCounter;
+import su.nlq.vertx.prometheus.metrics.counters.WebsocketGauge;
 
 public final class HTTPServerPrometheusMetrics extends TCPPrometheusMetrics implements HttpServerMetrics<RequestMetric, SocketAddress, SocketAddress> {
-
-  private static final @NotNull Gauge websockets = Gauge.build("vertx_httpserver_websockets", "HTTP server websockets number")
-      .labelNames("local_address", "remote_address").create();
-
   private static final @NotNull Gauge requests = Gauge.build("vertx_httpserver_requests", "HTTP server requests number")
       .labelNames("local_address", "state").create();
 
-  private static final @NotNull Counter time = Counter.build("vertx_httpserver_requests_time", "HTTP server total requests processing time (μs)")
-      .labelNames("local_address").create();
-
   private final @NotNull SocketAddress localAddress;
+
+  private final @NotNull WebsocketGauge websockets;
+  private final @NotNull TimeCounter requestTime;
 
   public HTTPServerPrometheusMetrics(@NotNull CollectorRegistry registry, @NotNull SocketAddress localAddress) {
     super(registry, "httpserver", localAddress.toString());
     this.localAddress = localAddress;
+    websockets = new WebsocketGauge("httpserver", localAddress.toString()).register(this);
+    requestTime = new TimeCounter("httpserver_request", localAddress.toString()).register(this);
     register(requests);
-    register(time);
   }
 
   @Override
@@ -39,7 +37,7 @@ public final class HTTPServerPrometheusMetrics extends TCPPrometheusMetrics impl
 
   @Override
   public void requestReset(@NotNull RequestMetric metric) {
-    time.labels(localAddress.toString()).inc(metric.getStopwatch().stop());
+    requestTime.apply(metric.getRemoteAddress(), metric.getStopwatch());
     requests.labels(localAddress.toString(), "reset").inc();
     requests.labels(localAddress.toString(), "processed").inc();
     requests.labels(localAddress.toString(), "active").dec();
@@ -53,7 +51,8 @@ public final class HTTPServerPrometheusMetrics extends TCPPrometheusMetrics impl
 
   @Override
   public void responseEnd(@NotNull RequestMetric metric, @NotNull HttpServerResponse response) {
-    time.labels(localAddress.toString()).inc(metric.getStopwatch().stop());
+    //todo: response
+    requestTime.apply(metric.getRemoteAddress(), metric.getStopwatch());
     requests.labels(localAddress.toString(), "processed").inc();
     requests.labels(localAddress.toString(), "active").dec();
   }
@@ -66,12 +65,12 @@ public final class HTTPServerPrometheusMetrics extends TCPPrometheusMetrics impl
 
   @Override
   public @NotNull SocketAddress connected(@NotNull SocketAddress namedRemoteAddress, @NotNull ServerWebSocket serverWebSocket) {
-    websockets.labels(localAddress.toString(), namedRemoteAddress.toString()).inc();
+    websockets.increment(namedRemoteAddress);
     return namedRemoteAddress;
   }
 
   @Override
   public void disconnected(@NotNull SocketAddress namedRemoteAddress) {
-    websockets.labels(localAddress.toString(), namedRemoteAddress.toString()).dec();
+    websockets.decrement(namedRemoteAddress);
   }
 }
