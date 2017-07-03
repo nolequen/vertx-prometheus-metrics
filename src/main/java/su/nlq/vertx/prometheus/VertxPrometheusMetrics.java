@@ -36,8 +36,8 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
   public VertxPrometheusMetrics(@NotNull Vertx vertx, @NotNull VertxPrometheusOptions options) {
     this.vertx = vertx;
     this.options = options;
-    this.verticleMetrics = options.isEnabled(Verticles) ? new PrometheusVerticleMetrics(options.getRegistry()) : new DummyVerticleMetrics();
-    this.timerMetrics = options.isEnabled(Timers) ? new PrometheusTimerMetrics(options.getRegistry()) : new DummyTimerMetrics();
+    this.verticleMetrics = options.isEnabled(Verticles) ? new VerticlePrometheusMetrics(options.getRegistry()) : new VerticleDummyMetrics();
+    this.timerMetrics = options.isEnabled(Timers) ? new TimerPrometheusMetrics(options.getRegistry()) : new TimerDummyMetrics();
   }
 
   @Override
@@ -143,11 +143,11 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
     void ended(long id, boolean cancelled);
   }
 
-  private static final class PrometheusVerticleMetrics extends PrometheusMetrics implements VerticleMetrics {
+  private static final class VerticlePrometheusMetrics extends PrometheusMetrics implements VerticleMetrics {
     private static final @NotNull Gauge collector =
         Gauge.build("vertx_verticle_number", "Deployed verticles number").labelNames("class").create();
 
-    public PrometheusVerticleMetrics(@NotNull CollectorRegistry registry) {
+    public VerticlePrometheusMetrics(@NotNull CollectorRegistry registry) {
       super(registry);
       register(collector);
     }
@@ -163,11 +163,11 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
     }
   }
 
-  private static final class PrometheusTimerMetrics extends PrometheusMetrics implements TimerMetrics {
+  private static final class TimerPrometheusMetrics extends PrometheusMetrics implements TimerMetrics {
     private static final @NotNull Gauge collector =
         Gauge.build("vertx_timers_number", "Timers number").labelNames("counter").create();
 
-    public PrometheusTimerMetrics(@NotNull CollectorRegistry registry) {
+    public TimerPrometheusMetrics(@NotNull CollectorRegistry registry) {
       super(registry);
       register(collector);
     }
@@ -188,7 +188,7 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
     }
   }
 
-  private final class DummyVerticleMetrics implements @NotNull VerticleMetrics {
+  private final class VerticleDummyMetrics implements @NotNull VerticleMetrics {
 
     @Override
     public void deployed(@NotNull Verticle verticle) {
@@ -201,7 +201,7 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
     }
   }
 
-  private final class DummyTimerMetrics implements @NotNull TimerMetrics {
+  private final class TimerDummyMetrics implements @NotNull TimerMetrics {
 
     @Override
     public void created(long id) {

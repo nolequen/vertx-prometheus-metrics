@@ -7,14 +7,12 @@ import io.vertx.core.spi.metrics.PoolMetrics;
 import org.jetbrains.annotations.NotNull;
 
 public final class PoolPrometheusMetrics extends PrometheusMetrics implements PoolMetrics<Stopwatch> {
-  private final @NotNull String type;
-  private final @NotNull String name;
-
   private static final @NotNull Gauge states = Gauge.build("vertx_pools", "Pools states")
       .labelNames("type", "name", "state").create();
-
   private static final @NotNull Counter time = Counter.build("vertx_pools_time", "Pools time metrics (μs)")
       .labelNames("type", "name", "state").create();
+  private final @NotNull String name;
+  private final @NotNull String type;
 
   public PoolPrometheusMetrics(@NotNull CollectorRegistry registry, @NotNull String type, @NotNull String name, int maxSize) {
     super(registry);
@@ -22,31 +20,39 @@ public final class PoolPrometheusMetrics extends PrometheusMetrics implements Po
     this.name = name;
     register(states);
     register(time);
-    states.labels(type, name, "max_size").set(maxSize);
+    states("max_size").set(maxSize);
   }
 
   @Override
   public @NotNull Stopwatch submitted() {
-    states.labels(type, name, "queued").inc();
+    states("queued").inc();
     return new Stopwatch();
   }
 
   @Override
   public void rejected(@NotNull Stopwatch submittedStopwatch) {
-    states.labels(type, name, "queued").dec();
+    states("queued").dec();
   }
 
   @Override
   public @NotNull Stopwatch begin(@NotNull Stopwatch submittedStopwatch) {
-    states.labels(type, name, "queued").dec();
-    states.labels(type, name, "used").inc();
-    time.labels(type, name, "delay").inc(submittedStopwatch.stop());
+    states("queued").dec();
+    states("used").inc();
+    time("delay").inc(submittedStopwatch.stop());
     return submittedStopwatch;
   }
 
   @Override
   public void end(@NotNull Stopwatch beginStopwatch, boolean succeeded) {
-    time.labels(type, name, "process").inc(beginStopwatch.stop());
-    states.labels(type, name, "used").dec();
+    time("process").inc(beginStopwatch.stop());
+    states("used").dec();
+  }
+
+  private @NotNull Counter.Child time(@NotNull String state) {
+    return time.labels(type, name, state);
+  }
+
+  private @NotNull Gauge.Child states(@NotNull String state) {
+    return states.labels(type, name, state);
   }
 }

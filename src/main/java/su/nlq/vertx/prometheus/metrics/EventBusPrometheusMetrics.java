@@ -57,39 +57,36 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
 
   @Override
   public void scheduleMessage(@NotNull Metric metric, boolean local) {
-    messages.labels(local ? "local" : "remote", "scheduled", metric.address).inc();
+    messages(metric.address, local, "scheduled").inc();
   }
 
   @Override
   public void beginHandleMessage(@NotNull Metric metric, boolean local) {
-    final String range = local ? "local" : "remote";
     final String address = metric.address;
-    messages.labels(range, "pending", address).dec();
-    messages.labels(range, "scheduled", address).dec();
+    messages(address, local, "pending").dec();
+    messages(address, local, "scheduled").dec();
     metric.stopwatch.reset();
   }
 
   @Override
   public void endHandleMessage(@NotNull Metric metric, @Nullable Throwable failure) {
-    final String address = metric.address;
-    time.labels(address).inc(metric.stopwatch.stop());
+    time.labels(metric.address).inc(metric.stopwatch.stop());
     if (failure != null) {
-      failures.labels(address, "request", failure.getClass().getSimpleName()).inc();
+      failures.labels(metric.address, "request", failure.getClass().getSimpleName()).inc();
     }
   }
 
   @Override
   public void messageSent(@NotNull String address, boolean publish, boolean local, boolean remote) {
-    messages.labels(local ? "local" : "remote", publish ? "publish" : "sent", address).inc();
+    messages(address, local, publish ? "publish" : "sent").inc();
   }
 
   @Override
   public void messageReceived(@NotNull String address, boolean publish, boolean local, int handlersNumber) {
-    final String range = local ? "local" : "remote";
-    messages.labels(range, "pending", address).inc(handlersNumber);
-    messages.labels(range, "received", address).inc();
+    messages(address, local, "pending").inc(handlersNumber);
+    messages(address, local, "received").inc();
     if (handlersNumber > 0) {
-      messages.labels(range, "delivered", address).inc();
+      messages(address, local, "delivered").inc();
     }
   }
 
@@ -106,6 +103,10 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
   @Override
   public void replyFailure(@NotNull String address, @NotNull ReplyFailure failure) {
     failures.labels(address, "reply", failure.name()).inc();
+  }
+
+  private static @NotNull Gauge.Child messages(@NotNull String address, boolean local, @NotNull String state) {
+    return messages.labels(local ? "local" : "remote", state, address);
   }
 
   public static final class Metric {

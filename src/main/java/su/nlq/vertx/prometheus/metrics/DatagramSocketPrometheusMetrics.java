@@ -26,16 +26,20 @@ public final class DatagramSocketPrometheusMetrics extends PrometheusMetrics imp
 
   @Override
   public void bytesRead(@Nullable Void socketMetric, @NotNull SocketAddress remoteAddress, long numberOfBytes) {
-    counter.labels("received", String.valueOf(namedLocalAddress), remoteAddress.toString()).inc(numberOfBytes);
+    counter(remoteAddress, "received").inc(numberOfBytes);
   }
 
   @Override
   public void bytesWritten(@Nullable Void socketMetric, @NotNull SocketAddress remoteAddress, long numberOfBytes) {
-    counter.labels("sent", String.valueOf(namedLocalAddress), remoteAddress.toString()).inc(numberOfBytes);
+    counter(remoteAddress, "sent").inc(numberOfBytes);
   }
 
   @Override
   public void exceptionOccurred(@Nullable Void socketMetric, @NotNull SocketAddress remoteAddress, @NotNull Throwable throwable) {
-    counter.labels("errors", String.valueOf(namedLocalAddress), remoteAddress.toString()).inc();
+    counter(remoteAddress, "errors").inc();
+  }
+
+  private @NotNull Counter.Child counter(@NotNull SocketAddress remoteAddress, @NotNull String type) {
+    return counter.labels(type, String.valueOf(namedLocalAddress), remoteAddress.toString());
   }
 }
