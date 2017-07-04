@@ -1,13 +1,13 @@
-package su.nlq.vertx.prometheus.metrics;
+package io.vertx.ext.prometheus.metrics;
 
 import io.prometheus.client.CollectorRegistry;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.core.spi.metrics.TCPMetrics;
+import io.vertx.ext.prometheus.metrics.counters.ConnectionGauge;
+import io.vertx.ext.prometheus.metrics.counters.ErrorCounter;
 import org.jetbrains.annotations.NotNull;
-import su.nlq.vertx.prometheus.metrics.counters.BytesCounter;
-import su.nlq.vertx.prometheus.metrics.counters.ConnectionGauge;
-import su.nlq.vertx.prometheus.metrics.counters.ErrorCounter;
+import io.vertx.ext.prometheus.metrics.counters.BytesCounter;
 
 public abstract class TCPPrometheusMetrics extends PrometheusMetrics implements TCPMetrics<SocketAddress> {
   private final @NotNull ConnectionGauge connections;

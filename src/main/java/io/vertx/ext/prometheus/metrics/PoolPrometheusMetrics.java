@@ -1,4 +1,4 @@
-package su.nlq.vertx.prometheus.metrics;
+package io.vertx.ext.prometheus.metrics;
 
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;

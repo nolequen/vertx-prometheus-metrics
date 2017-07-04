@@ -1,21 +1,25 @@
-package su.nlq.vertx.prometheus;
+package io.vertx.ext.prometheus;
 
 import io.prometheus.client.CollectorRegistry;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.MetricsOptions;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.net.impl.SocketAddressImpl;
+import io.vertx.ext.prometheus.metrics.MetricsType;
 import org.jetbrains.annotations.NotNull;
-import su.nlq.vertx.prometheus.metrics.MetricsType;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 
 public final class VertxPrometheusOptions extends MetricsOptions {
+  private static final @NotNull JsonArray EMPTY_METRICS = new JsonArray(Collections.emptyList());
 
   private static final @NotNull String DEFAULT_HOST = "localhost";
   private static final int DEFAULT_PORT = 9090;
 
-  private final @NotNull EnumSet<MetricsType> metrics = EnumSet.allOf(MetricsType.class);
+  private final @NotNull EnumSet<MetricsType> metrics;
 
   private @NotNull CollectorRegistry registry = CollectorRegistry.defaultRegistry;
   private @NotNull String host = DEFAULT_HOST;
@@ -23,19 +27,34 @@ public final class VertxPrometheusOptions extends MetricsOptions {
 
   public VertxPrometheusOptions() {
     super();
+    metrics = EnumSet.allOf(MetricsType.class);
   }
 
   public VertxPrometheusOptions(@NotNull VertxPrometheusOptions other) {
     super(other);
+    registry = other.registry;
+    host = other.host;
+    port = other.port;
+    metrics = EnumSet.copyOf(other.metrics);
   }
 
   public VertxPrometheusOptions(@NotNull JsonObject json) {
     super(json);
+    host = json.getString("host", DEFAULT_HOST);
+    port = json.getInteger("port", DEFAULT_PORT);
+    metrics = EnumSet.noneOf(MetricsType.class);
+    for (Object metric : json.getJsonArray("metrics", EMPTY_METRICS).getList()) {
+      metrics.add((MetricsType) metric);
+    }
   }
 
   @Override
   public @NotNull JsonObject toJson() {
-    return super.toJson();
+    final JsonObject entries = super.toJson();
+    entries.put("host", host);
+    entries.put("port", port);
+    entries.put("metrics", new JsonArray(new ArrayList<>(metrics)));
+    return entries;
   }
 
   public @NotNull SocketAddress getAddress() {

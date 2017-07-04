@@ -1,4 +1,4 @@
-package su.nlq.vertx.prometheus.server;
+package io.vertx.ext.prometheus.server;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.prometheus.client.CollectorRegistry;

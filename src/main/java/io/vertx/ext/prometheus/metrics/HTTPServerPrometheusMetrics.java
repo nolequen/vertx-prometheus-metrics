@@ -1,4 +1,4 @@
-package su.nlq.vertx.prometheus.metrics;
+package io.vertx.ext.prometheus.metrics;
 
 import io.prometheus.client.CollectorRegistry;
 import io.vertx.core.http.HttpMethod;
@@ -7,9 +7,9 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.HttpServerMetrics;
+import io.vertx.ext.prometheus.metrics.counters.HTTPRequestMetrics;
+import io.vertx.ext.prometheus.metrics.counters.WebsocketGauge;
 import org.jetbrains.annotations.NotNull;
-import su.nlq.vertx.prometheus.metrics.counters.HTTPRequestMetrics;
-import su.nlq.vertx.prometheus.metrics.counters.WebsocketGauge;
 
 public final class HTTPServerPrometheusMetrics extends TCPPrometheusMetrics implements HttpServerMetrics<HTTPRequestMetrics.Metric, SocketAddress, SocketAddress> {
   private static final @NotNull String NAME = "httpserver";

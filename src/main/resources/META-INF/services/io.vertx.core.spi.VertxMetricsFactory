@@ -1,1 +1,1 @@
-su.nlq.vertx.prometheus.VertxPrometheusMetricsFactory
+io.vertx.ext.prometheus.VertxPrometheusMetricsFactory

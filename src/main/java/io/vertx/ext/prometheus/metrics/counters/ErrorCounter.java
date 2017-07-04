@@ -1,9 +1,9 @@
-package su.nlq.vertx.prometheus.metrics.counters;
+package io.vertx.ext.prometheus.metrics.counters;
 
 import io.prometheus.client.Counter;
 import io.vertx.core.net.SocketAddress;
 import org.jetbrains.annotations.NotNull;
-import su.nlq.vertx.prometheus.metrics.PrometheusMetrics;
+import io.vertx.ext.prometheus.metrics.PrometheusMetrics;
 
 public final class ErrorCounter {
   private final @NotNull Counter counter;

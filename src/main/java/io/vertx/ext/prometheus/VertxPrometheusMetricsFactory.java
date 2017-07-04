@@ -1,4 +1,4 @@
-package su.nlq.vertx.prometheus;
+package io.vertx.ext.prometheus;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;

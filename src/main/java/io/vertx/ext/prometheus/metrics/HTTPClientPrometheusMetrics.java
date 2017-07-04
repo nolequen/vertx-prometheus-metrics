@@ -1,4 +1,4 @@
-package su.nlq.vertx.prometheus.metrics;
+package io.vertx.ext.prometheus.metrics;
 
 import io.prometheus.client.CollectorRegistry;
 import io.vertx.core.http.HttpClientRequest;
@@ -8,9 +8,9 @@ import io.vertx.core.net.SocketAddress;
 import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
 import org.jetbrains.annotations.NotNull;
-import su.nlq.vertx.prometheus.metrics.counters.EndpointMetrics;
-import su.nlq.vertx.prometheus.metrics.counters.HTTPRequestMetrics;
-import su.nlq.vertx.prometheus.metrics.counters.WebsocketGauge;
+import io.vertx.ext.prometheus.metrics.counters.EndpointMetrics;
+import io.vertx.ext.prometheus.metrics.counters.HTTPRequestMetrics;
+import io.vertx.ext.prometheus.metrics.counters.WebsocketGauge;
 
 public final class HTTPClientPrometheusMetrics extends TCPPrometheusMetrics implements HttpClientMetrics<HTTPRequestMetrics.Metric, SocketAddress, SocketAddress, SocketAddress, Stopwatch> {
   private static final @NotNull String NAME = "httpclient";

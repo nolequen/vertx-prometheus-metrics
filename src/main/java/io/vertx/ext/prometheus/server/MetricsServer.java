@@ -1,4 +1,4 @@
-package su.nlq.vertx.prometheus.server;
+package io.vertx.ext.prometheus.server;
 
 import io.prometheus.client.CollectorRegistry;
 import io.vertx.core.Closeable;

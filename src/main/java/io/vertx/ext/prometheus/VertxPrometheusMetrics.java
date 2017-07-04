@@ -1,4 +1,4 @@
-package su.nlq.vertx.prometheus;
+package io.vertx.ext.prometheus;
 
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
@@ -18,12 +18,12 @@ import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.*;
+import io.vertx.ext.prometheus.metrics.*;
+import io.vertx.ext.prometheus.server.MetricsServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nlq.vertx.prometheus.metrics.*;
-import su.nlq.vertx.prometheus.server.MetricsServer;
 
-import static su.nlq.vertx.prometheus.metrics.MetricsType.*;
+import static io.vertx.ext.prometheus.metrics.MetricsType.*;
 
 public final class VertxPrometheusMetrics extends DummyVertxMetrics {
   private final @NotNull Vertx vertx;

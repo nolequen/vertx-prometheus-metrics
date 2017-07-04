@@ -1,12 +1,12 @@
-package su.nlq.vertx.prometheus.metrics.counters;
+package io.vertx.ext.prometheus.metrics.counters;
 
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.net.SocketAddress;
+import io.vertx.ext.prometheus.metrics.Stopwatch;
 import org.jetbrains.annotations.NotNull;
-import su.nlq.vertx.prometheus.metrics.PrometheusMetrics;
-import su.nlq.vertx.prometheus.metrics.Stopwatch;
+import io.vertx.ext.prometheus.metrics.PrometheusMetrics;
 
 public final class HTTPRequestMetrics {
   private final @NotNull Gauge requests;
