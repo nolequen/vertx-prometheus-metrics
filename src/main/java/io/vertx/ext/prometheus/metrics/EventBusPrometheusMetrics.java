@@ -57,21 +57,30 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
 
   @Override
   public void scheduleMessage(@Nullable Metric metric, boolean local) {
+    messages(address(metric), local, "scheduled").inc();
   }
 
   @Override
-  public void beginHandleMessage(@NotNull Metric metric, boolean local) {
-    final String address = metric.address;
-    messages(address, local, "pending").dec();
-    metric.stopwatch.reset();
-  }
-
-  @Override
-  public void endHandleMessage(@NotNull Metric metric, @Nullable Throwable failure) {
-    time.labels(metric.address).inc(metric.stopwatch.stop());
-    if (failure != null) {
-      failures.labels(metric.address, "request", failure.getClass().getSimpleName()).inc();
+  public void beginHandleMessage(@Nullable Metric metric, boolean local) {
+    messages(address(metric), local, "pending").dec();
+    messages(address(metric), local, "scheduled").dec();
+    if (metric != null) {
+      metric.stopwatch.reset();
     }
+  }
+
+  @Override
+  public void endHandleMessage(@Nullable Metric metric, @Nullable Throwable failure) {
+    if (metric != null) {
+      time.labels(metric.address).inc(metric.stopwatch.stop());
+    }
+    if (failure != null) {
+      failures.labels(address(metric), "request", failure.getClass().getSimpleName()).inc();
+    }
+  }
+
+  private static @NotNull String address(@Nullable EventBusPrometheusMetrics.Metric metric) {
+    return metric == null ? "unknown" : metric.address;
   }
 
   @Override
