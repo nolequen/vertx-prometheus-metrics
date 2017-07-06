@@ -56,15 +56,13 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
   }
 
   @Override
-  public void scheduleMessage(@NotNull Metric metric, boolean local) {
-    messages(metric.address, local, "scheduled").inc();
+  public void scheduleMessage(@Nullable Metric metric, boolean local) {
   }
 
   @Override
   public void beginHandleMessage(@NotNull Metric metric, boolean local) {
     final String address = metric.address;
     messages(address, local, "pending").dec();
-    messages(address, local, "scheduled").dec();
     metric.stopwatch.reset();
   }
 
