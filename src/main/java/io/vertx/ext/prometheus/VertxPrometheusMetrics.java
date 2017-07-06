@@ -82,7 +82,7 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
   @Override
   public @NotNull HttpClientMetrics<?, ?, ?, ?, ?> createMetrics(@NotNull HttpClient client, @NotNull HttpClientOptions httpClientOptions) {
     return options.isEnabled(HTTPClient)
-        ? new HTTPClientPrometheusMetrics(options.getRegistry(), httpClientOptions.getLocalAddress())
+        ? new HTTPClientPrometheusMetrics(options.getRegistry(), getLocalAddress(httpClientOptions.getLocalAddress()))
         : super.createMetrics(client, httpClientOptions);
   }
 
@@ -96,7 +96,7 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
   @Override
   public @NotNull TCPMetrics<?> createMetrics(@NotNull NetClient client, @NotNull NetClientOptions netClientOptions) {
     return options.isEnabled(NetClient)
-        ? new NetClientPrometheusMetrics(options.getRegistry(), netClientOptions.getLocalAddress())
+        ? new NetClientPrometheusMetrics(options.getRegistry(), getLocalAddress(netClientOptions.getLocalAddress()))
         : super.createMetrics(client, netClientOptions);
   }
 
@@ -129,6 +129,10 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
     if (server != null) {
       server.close(event -> { /* do nothing */ });
     }
+  }
+
+  private static @NotNull String getLocalAddress(@Nullable String address) {
+    return address == null ? "unknown" : address;
   }
 
   private interface VerticleMetrics {
