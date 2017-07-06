@@ -50,9 +50,11 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
 
 
   @Override
-  public void handlerUnregistered(@NotNull Metric metric) {
-    handlers.labels(metric.address).dec();
-    metric.respondent.ifPresent(r -> respondents.labels(metric.address).dec());
+  public void handlerUnregistered(@Nullable Metric metric) {
+    handlers.labels(address(metric)).dec();
+    if (metric != null) {
+      metric.respondent.ifPresent(r -> respondents.labels(metric.address).dec());
+    }
   }
 
   @Override
