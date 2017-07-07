@@ -20,15 +20,23 @@ public final class MetricsHandler implements Handler<RoutingContext> {
 
   @Override
   public void handle(@NotNull RoutingContext context) {
-    try (final BufferWriter writer = new BufferWriter()) {
-      TextFormat.write004(writer, registry.metricFamilySamples());
-      context.response()
-          .setStatusCode(HttpResponseStatus.OK.code())
-          .putHeader("Content-Type", TextFormat.CONTENT_TYPE_004)
-          .end(writer.buffer);
-    } catch (IOException e) {
-      context.fail(e);
-    }
+    context.vertx().<Buffer>executeBlocking(future -> {
+      try (final BufferWriter writer = new BufferWriter()) {
+        TextFormat.write004(writer, registry.metricFamilySamples());
+        future.complete(writer.buffer);
+      } catch (IOException e) {
+        future.fail(e);
+      }
+    }, false, result -> {
+      if (result.succeeded()) {
+        context.response()
+            .setStatusCode(HttpResponseStatus.OK.code())
+            .putHeader("Content-Type", TextFormat.CONTENT_TYPE_004)
+            .end(result.result());
+      } else {
+        context.fail(result.cause());
+      }
+    });
   }
 
   private static final class BufferWriter extends Writer {

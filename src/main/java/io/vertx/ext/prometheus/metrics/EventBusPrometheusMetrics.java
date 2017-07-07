@@ -12,22 +12,28 @@ import java.util.Optional;
 
 public final class EventBusPrometheusMetrics extends PrometheusMetrics implements EventBusMetrics<EventBusPrometheusMetrics.Metric> {
 
-  private static final @NotNull Gauge handlers = Gauge.build("vertx_eventbus_handlers", "Message handlers number")
-      .labelNames("address").create();
+  private static final @NotNull Gauge handlers = Gauge
+      .build("vertx_eventbus_handlers", "Message handlers number")
+      .create();
 
-  private static final @NotNull Gauge respondents = Gauge.build("vertx_eventbus_respondents", "Reply handlers number")
-      .labelNames("handler_address").create();
+  private static final @NotNull Gauge respondents = Gauge
+      .build("vertx_eventbus_respondents", "Reply handlers number")
+      .create();
 
-  private static final @NotNull Gauge messages = Gauge.build("vertx_eventbus_messages", "EventBus messages metrics")
+  private static final @NotNull Gauge messages = Gauge
+      .build("vertx_eventbus_messages", "EventBus messages metrics")
       .labelNames("range", "status", "address").create();
 
-  private static final @NotNull Counter failures = Counter.build("vertx_eventbus_failures", "Message handling failures number")
+  private static final @NotNull Counter failures = Counter
+      .build("vertx_eventbus_failures", "Message handling failures number")
       .labelNames("address", "direction", "reason").create();
 
-  private static final @NotNull Counter time = Counter.build("vertx_eventbus_messages_time", "Total messages processing time (μs)")
+  private static final @NotNull Counter time = Counter
+      .build("vertx_eventbus_messages_time", "Total messages processing time (μs)")
       .labelNames("address").create();
 
-  private static final @NotNull Counter bytes = Counter.build("vertx_eventbus_data", "Total write/read bytes by address")
+  private static final @NotNull Counter bytes = Counter
+      .build("vertx_eventbus_data", "Total write/read bytes by address")
       .labelNames("address", "operation").create();
 
   public EventBusPrometheusMetrics(@NotNull CollectorRegistry registry) {
@@ -42,18 +48,18 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
 
   @Override
   public @NotNull Metric handlerRegistered(@NotNull String address, @Nullable String repliedAddress) {
-    handlers.labels(address).inc();
+    handlers.inc();
     final Optional<String> respondent = Optional.ofNullable(repliedAddress);
-    respondent.ifPresent(r -> respondents.labels(address).inc());
+    respondent.ifPresent(r -> respondents.inc());
     return new Metric(address, respondent);
   }
 
 
   @Override
   public void handlerUnregistered(@Nullable Metric metric) {
-    handlers.labels(address(metric)).dec();
+    handlers.dec();
     if (metric != null) {
-      metric.respondent.ifPresent(r -> respondents.labels(metric.address).dec());
+      metric.respondent.ifPresent(r -> respondents.dec());
     }
   }
 
