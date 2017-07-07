@@ -1,7 +1,6 @@
 package io.vertx.ext.prometheus.metrics.counters;
 
 import io.prometheus.client.Gauge;
-import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.prometheus.metrics.Stopwatch;
 import org.jetbrains.annotations.NotNull;
 import io.vertx.ext.prometheus.metrics.PrometheusMetrics;
@@ -14,7 +13,7 @@ public final class EndpointMetrics {
   public EndpointMetrics(@NotNull String name, @NotNull String localAddress) {
     this.localAddress = localAddress;
     gauge = Gauge.build("vertx_" + name + "_endpoints", "Endpoints metrics")
-        .labelNames("local_address", "remote_address", "counter").create();
+        .labelNames("local_address", "counter").create();
     queueTime = new TimeCounter(name + "_endpoint_queue", localAddress);
   }
 
@@ -24,33 +23,25 @@ public final class EndpointMetrics {
     return this;
   }
 
-  public void increment(@NotNull SocketAddress endpoint) {
-    connectionsGauge(endpoint).inc();
+  public void increment() {
+    gauge("connections").inc();
   }
 
-  public void decrement(@NotNull SocketAddress endpoint) {
-    connectionsGauge(endpoint).dec();
+  public void decrement() {
+    gauge("connections").dec();
   }
 
-  public @NotNull Stopwatch enqueue(@NotNull SocketAddress endpoint) {
-    queueGauge(endpoint).inc();
+  public @NotNull Stopwatch enqueue() {
+    gauge("queue-size").inc();
     return new Stopwatch();
   }
 
-  public void dequeue(@NotNull SocketAddress endpoint, @NotNull Stopwatch stopwatch) {
-    queueGauge(endpoint).dec();
-    queueTime.apply(endpoint, stopwatch);
+  public void dequeue(@NotNull Stopwatch stopwatch) {
+    gauge("queue-size").dec();
+    queueTime.apply(stopwatch);
   }
 
-  private @NotNull Gauge.@NotNull Child queueGauge(@NotNull SocketAddress endpoint) {
-    return gauge(endpoint, "queue-size");
-  }
-
-  private @NotNull Gauge.Child connectionsGauge(@NotNull SocketAddress endpoint) {
-    return gauge(endpoint, "connections");
-  }
-
-  private @NotNull Gauge.Child gauge(@NotNull SocketAddress endpoint, @NotNull String name) {
-    return gauge.labels(localAddress, endpoint.toString(), name);
+  private @NotNull Gauge.Child gauge(@NotNull String name) {
+    return gauge.labels(localAddress, name);
   }
 }

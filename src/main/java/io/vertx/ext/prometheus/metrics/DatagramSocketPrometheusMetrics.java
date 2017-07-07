@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 public final class DatagramSocketPrometheusMetrics extends PrometheusMetrics implements DatagramSocketMetrics {
   private final @NotNull Counter counter = Counter.build("vertx_datagram_socket", "Datagram socket metrics")
-      .labelNames("type", "local_address", "remote_address").create();
+      .labelNames("type", "local_address").create();
 
   private volatile @Nullable SocketAddress namedLocalAddress;
 
@@ -26,20 +26,20 @@ public final class DatagramSocketPrometheusMetrics extends PrometheusMetrics imp
 
   @Override
   public void bytesRead(@Nullable Void socketMetric, @NotNull SocketAddress remoteAddress, long numberOfBytes) {
-    counter(remoteAddress, "received").inc(numberOfBytes);
+    counter("received").inc(numberOfBytes);
   }
 
   @Override
   public void bytesWritten(@Nullable Void socketMetric, @NotNull SocketAddress remoteAddress, long numberOfBytes) {
-    counter(remoteAddress, "sent").inc(numberOfBytes);
+    counter("sent").inc(numberOfBytes);
   }
 
   @Override
   public void exceptionOccurred(@Nullable Void socketMetric, @NotNull SocketAddress remoteAddress, @NotNull Throwable throwable) {
-    counter(remoteAddress, "errors").inc();
+    counter("errors").inc();
   }
 
-  private @NotNull Counter.Child counter(@NotNull SocketAddress remoteAddress, @NotNull String type) {
-    return counter.labels(type, String.valueOf(namedLocalAddress), remoteAddress.toString());
+  private @NotNull Counter.Child counter(@NotNull String type) {
+    return counter.labels(type, String.valueOf(namedLocalAddress));
   }
 }

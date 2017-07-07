@@ -17,9 +17,9 @@ public final class HTTPRequestMetrics {
   public HTTPRequestMetrics(@NotNull String name, @NotNull String localAddress) {
     this.localAddress = localAddress;
     requests = Gauge.build("vertx_" + name + "_requests", "HTTP requests number")
-        .labelNames("local_address", "remote_address", "method", "path", "state").create();
+        .labelNames("local_address", "method", "path", "state").create();
     responses = Counter.build("vertx_" + name + "_responses", "HTTP responses number")
-        .labelNames("local_address", "remote_address", "code").create();
+        .labelNames("local_address", "code").create();
     proocessTime = new TimeCounter(name + "_requests", localAddress);
   }
 
@@ -30,55 +30,52 @@ public final class HTTPRequestMetrics {
     return this;
   }
 
-  public @NotNull Metric begin(@NotNull SocketAddress remoteAddress, @NotNull HttpMethod method, @NotNull String path) {
-    requests(remoteAddress, method.name(), path, "active").inc();
-    requests(remoteAddress, method.name(), path, "total").inc();
-    return new Metric(remoteAddress, method, path);
+  public @NotNull Metric begin(@NotNull HttpMethod method, @NotNull String path) {
+    requests(method.name(), path, "active").inc();
+    requests(method.name(), path, "total").inc();
+    return new Metric(method, path);
   }
 
   public void reset(@NotNull Metric metric) {
-    proocessTime.apply(metric.remoteAddress, metric.stopwatch);
+    proocessTime.apply(metric.stopwatch);
     requests(metric, "reset").inc();
     requests(metric, "processed").inc();
     requests(metric, "active").dec();
   }
 
   public void responseEnd(@NotNull Metric metric, int responseStatusCode) {
-    proocessTime.apply(metric.remoteAddress, metric.stopwatch);
+    proocessTime.apply(metric.stopwatch);
     requests(metric, "active").dec();
     requests(metric, "processed").dec();
-    responses(metric, responseStatusCode).inc();
+    responses(responseStatusCode).inc();
   }
 
   public void requestEnd(@NotNull Metric metric) {
-    proocessTime.apply(metric.remoteAddress, metric.stopwatch);
+    proocessTime.apply(metric.stopwatch);
   }
 
-  public @NotNull SocketAddress upgrade(@NotNull Metric metric) {
+  public void upgrade(@NotNull Metric metric) {
     requests(metric, "upgraded").inc();
-    return metric.remoteAddress;
   }
 
-  private @NotNull Counter.Child responses(@NotNull Metric metric, int responseStatusCode) {
-    return responses.labels(localAddress, metric.remoteAddress.toString(), Integer.toString(responseStatusCode));
+  private @NotNull Counter.Child responses(int responseStatusCode) {
+    return responses.labels(localAddress, Integer.toString(responseStatusCode));
   }
 
   private @NotNull Gauge.Child requests(@NotNull HTTPRequestMetrics.@NotNull Metric metric, @NotNull String state) {
-    return requests(metric.remoteAddress, metric.method.name(), metric.path, state);
+    return requests(metric.method.name(), metric.path, state);
   }
 
-  private @NotNull Gauge.Child requests(@NotNull SocketAddress remoteAddress, @NotNull String method, @NotNull String path, @NotNull String state) {
-    return requests.labels(localAddress, remoteAddress.toString(), method, path, state);
+  private @NotNull Gauge.Child requests(@NotNull String method, @NotNull String path, @NotNull String state) {
+    return requests.labels(localAddress, method, path, state);
   }
 
   public static final class Metric {
-    private final @NotNull SocketAddress remoteAddress;
     private final @NotNull HttpMethod method;
     private final @NotNull String path;
     private final @NotNull Stopwatch stopwatch = new Stopwatch();
 
-    public Metric(@NotNull SocketAddress remoteAddress, @NotNull HttpMethod method, @NotNull String path) {
-      this.remoteAddress = remoteAddress;
+    public Metric(@NotNull HttpMethod method, @NotNull String path) {
       this.method = method;
       this.path = path;
     }

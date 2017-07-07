@@ -5,14 +5,14 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.WebSocket;
 import io.vertx.core.net.SocketAddress;
-import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
 import org.jetbrains.annotations.NotNull;
 import io.vertx.ext.prometheus.metrics.counters.EndpointMetrics;
 import io.vertx.ext.prometheus.metrics.counters.HTTPRequestMetrics;
 import io.vertx.ext.prometheus.metrics.counters.WebsocketGauge;
+import org.jetbrains.annotations.Nullable;
 
-public final class HTTPClientPrometheusMetrics extends TCPPrometheusMetrics implements HttpClientMetrics<HTTPRequestMetrics.Metric, SocketAddress, SocketAddress, SocketAddress, Stopwatch> {
+public final class HTTPClientPrometheusMetrics extends TCPPrometheusMetrics implements HttpClientMetrics<HTTPRequestMetrics.Metric, Void, Void, Void, Stopwatch> {
   private static final @NotNull String NAME = "httpclient";
 
   private final @NotNull EndpointMetrics endpoints;
@@ -27,49 +27,48 @@ public final class HTTPClientPrometheusMetrics extends TCPPrometheusMetrics impl
   }
 
   @Override
-  public @NotNull SocketAddress createEndpoint(@NotNull String host, int port, int maxPoolSize) {
-    return new SocketAddressImpl(port, host);
+  public @Nullable Void createEndpoint(@NotNull String host, int port, int maxPoolSize) {
+    return null;
   }
 
   @Override
-  public void closeEndpoint(@NotNull String host, int port, @NotNull SocketAddress endpoint) {
+  public void closeEndpoint(@NotNull String host, int port, @Nullable Void endpoint) {
   }
 
   @Override
-  public void endpointConnected(@NotNull SocketAddress endpoint, @NotNull SocketAddress socket) {
-    endpoints.increment(endpoint);
+  public void endpointConnected(@Nullable Void endpointMetric, @Nullable Void socketMetric) {
+    endpoints.increment();
   }
 
   @Override
-  public void endpointDisconnected(@NotNull SocketAddress endpoint, @NotNull SocketAddress socket) {
-    endpoints.decrement(endpoint);
+  public void endpointDisconnected(@Nullable Void endpointMetric, @Nullable Void socketMetric) {
+    endpoints.decrement();
   }
 
   @Override
-  public @NotNull SocketAddress connected(@NotNull SocketAddress endpoint, @NotNull SocketAddress namedRemoteAddress, @NotNull WebSocket webSocket) {
-    websockets.increment(namedRemoteAddress);
-    return namedRemoteAddress;
+  public @Nullable Void connected(@Nullable Void endpointMetric, @Nullable Void socketMetric, @NotNull WebSocket webSocket) {
+    websockets.increment();
+    return socketMetric;
   }
 
   @Override
-  public void disconnected(@NotNull SocketAddress namedRemoteAddress) {
-    websockets.decrement(namedRemoteAddress);
+  public void disconnected(@Nullable Void endpointMetric) {
+    websockets.decrement();
   }
 
   @Override
-  public @NotNull Stopwatch enqueueRequest(@NotNull SocketAddress endpoint) {
-    endpoints.enqueue(endpoint);
-    return new Stopwatch();
+  public @NotNull Stopwatch enqueueRequest(@Nullable Void endpointMetric) {
+    return endpoints.enqueue();
   }
 
   @Override
-  public void dequeueRequest(@NotNull SocketAddress endpoint, @NotNull Stopwatch stopwatch) {
-    endpoints.dequeue(endpoint, stopwatch);
+  public void dequeueRequest(@Nullable Void endpointMetric, @NotNull Stopwatch stopwatch) {
+    endpoints.dequeue(stopwatch);
   }
 
   @Override
-  public @NotNull HTTPRequestMetrics.Metric requestBegin(@NotNull SocketAddress endpoint, @NotNull SocketAddress namedRemoteAddress, @NotNull SocketAddress localAddress, @NotNull SocketAddress remoteAddress, @NotNull HttpClientRequest request) {
-    return requests.begin(namedRemoteAddress, request.method(), request.path());
+  public @NotNull HTTPRequestMetrics.Metric requestBegin(@Nullable Void endpointMetric, @Nullable Void socketMetric, @NotNull SocketAddress localAddress, @NotNull SocketAddress remoteAddress, @NotNull HttpClientRequest request) {
+    return requests.begin(request.method(), request.path());
   }
 
   @Override
@@ -83,8 +82,8 @@ public final class HTTPClientPrometheusMetrics extends TCPPrometheusMetrics impl
   }
 
   @Override
-  public @NotNull HTTPRequestMetrics.Metric responsePushed(@NotNull SocketAddress endpoint, @NotNull SocketAddress namedRemoteAddress, @NotNull SocketAddress localAddress, @NotNull SocketAddress remoteAddress, @NotNull HttpClientRequest request) {
-    return requestBegin(endpoint, namedRemoteAddress, localAddress, remoteAddress, request);
+  public @NotNull HTTPRequestMetrics.Metric responsePushed(@Nullable Void endpointMetric, @Nullable Void socketMetric, @NotNull SocketAddress localAddress, @NotNull SocketAddress remoteAddress, @NotNull HttpClientRequest request) {
+    return requestBegin(endpointMetric, socketMetric, localAddress, remoteAddress, request);
   }
 
   @Override

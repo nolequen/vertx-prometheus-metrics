@@ -1,7 +1,6 @@
 package io.vertx.ext.prometheus.metrics.counters;
 
 import io.prometheus.client.Gauge;
-import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.prometheus.metrics.PrometheusMetrics;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,23 +11,19 @@ public final class ConnectionGauge {
   public ConnectionGauge(@NotNull String name, @NotNull String localAddress) {
     this.localAddress = localAddress;
     gauge = Gauge.build("vertx_" + name + "_connections", "Active connections number")
-        .labelNames("local_address", "remote_address").create();
+        .labelNames("local_address").create();
   }
 
-  public void connected(@NotNull SocketAddress remoteAddress) {
-    gauge(remoteAddress).inc();
+  public void connected() {
+    gauge.labels(localAddress).inc();
   }
 
-  public void disconnected(@NotNull SocketAddress remoteAddress) {
-    gauge(remoteAddress).dec();
+  public void disconnected() {
+    gauge.labels(localAddress).dec();
   }
 
   public @NotNull ConnectionGauge register(@NotNull PrometheusMetrics metrics) {
     metrics.register(gauge);
     return this;
-  }
-
-  private @NotNull Gauge.Child gauge(@NotNull SocketAddress remoteAddress) {
-    return gauge.labels(localAddress, remoteAddress.toString());
   }
 }

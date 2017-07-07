@@ -2,14 +2,14 @@ package io.vertx.ext.prometheus.metrics;
 
 import io.prometheus.client.CollectorRegistry;
 import io.vertx.core.net.SocketAddress;
-import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.core.spi.metrics.TCPMetrics;
+import io.vertx.ext.prometheus.metrics.counters.BytesCounter;
 import io.vertx.ext.prometheus.metrics.counters.ConnectionGauge;
 import io.vertx.ext.prometheus.metrics.counters.ErrorCounter;
 import org.jetbrains.annotations.NotNull;
-import io.vertx.ext.prometheus.metrics.counters.BytesCounter;
+import org.jetbrains.annotations.Nullable;
 
-public abstract class TCPPrometheusMetrics extends PrometheusMetrics implements TCPMetrics<SocketAddress> {
+public abstract class TCPPrometheusMetrics extends PrometheusMetrics implements TCPMetrics<Void> {
   private final @NotNull ConnectionGauge connections;
   private final @NotNull BytesCounter bytes;
   private final @NotNull ErrorCounter errors;
@@ -22,29 +22,28 @@ public abstract class TCPPrometheusMetrics extends PrometheusMetrics implements 
   }
 
   @Override
-  public final @NotNull SocketAddress connected(@NotNull SocketAddress remoteAddress, @NotNull String remoteName) {
-    final SocketAddress namedRemoteAddress = new SocketAddressImpl(remoteAddress.port(), remoteName);
-    connections.connected(namedRemoteAddress);
-    return namedRemoteAddress;
+  public final @Nullable Void connected(@NotNull SocketAddress remoteAddress, @NotNull String remoteName) {
+    connections.connected();
+    return null;
   }
 
   @Override
-  public final void disconnected(@NotNull SocketAddress namedRemoteAddress, @NotNull SocketAddress remoteAddress) {
-    connections.disconnected(namedRemoteAddress);
+  public final void disconnected(@Nullable Void metric, @NotNull SocketAddress remoteAddress) {
+    connections.disconnected();
   }
 
   @Override
-  public final void bytesRead(@NotNull SocketAddress namedRemoteAddress, @NotNull SocketAddress remoteAddress, long numberOfBytes) {
-    bytes.read(namedRemoteAddress, numberOfBytes);
+  public final void bytesRead(@Nullable Void metric, @NotNull SocketAddress remoteAddress, long numberOfBytes) {
+    bytes.read(numberOfBytes);
   }
 
   @Override
-  public final void bytesWritten(@NotNull SocketAddress namedRemoteAddress, @NotNull SocketAddress remoteAddress, long numberOfBytes) {
-    bytes.written(namedRemoteAddress, numberOfBytes);
+  public final void bytesWritten(@Nullable Void metric, @NotNull SocketAddress remoteAddress, long numberOfBytes) {
+    bytes.written(numberOfBytes);
   }
 
   @Override
-  public final void exceptionOccurred(@NotNull SocketAddress namedRemoteAddress, @NotNull SocketAddress remoteAddress, @NotNull Throwable throwable) {
-    errors.increment(namedRemoteAddress, throwable);
+  public final void exceptionOccurred(@Nullable Void metric, @NotNull SocketAddress remoteAddress, @NotNull Throwable throwable) {
+    errors.increment(throwable);
   }
 }

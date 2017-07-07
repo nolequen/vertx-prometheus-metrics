@@ -10,8 +10,9 @@ import io.vertx.core.spi.metrics.HttpServerMetrics;
 import io.vertx.ext.prometheus.metrics.counters.HTTPRequestMetrics;
 import io.vertx.ext.prometheus.metrics.counters.WebsocketGauge;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public final class HTTPServerPrometheusMetrics extends TCPPrometheusMetrics implements HttpServerMetrics<HTTPRequestMetrics.Metric, SocketAddress, SocketAddress> {
+public final class HTTPServerPrometheusMetrics extends TCPPrometheusMetrics implements HttpServerMetrics<HTTPRequestMetrics.Metric, Void, Void> {
   private static final @NotNull String NAME = "httpserver";
 
   private final @NotNull HTTPRequestMetrics requests;
@@ -24,8 +25,8 @@ public final class HTTPServerPrometheusMetrics extends TCPPrometheusMetrics impl
   }
 
   @Override
-  public @NotNull HTTPRequestMetrics.Metric requestBegin(@NotNull SocketAddress namedRemoteAddress, @NotNull HttpServerRequest request) {
-    return requests.begin(namedRemoteAddress, request.method(), request.path());
+  public @NotNull HTTPRequestMetrics.Metric requestBegin(@Nullable Void metric, @NotNull HttpServerRequest request) {
+    return requests.begin(request.method(), request.path());
   }
 
   @Override
@@ -34,8 +35,8 @@ public final class HTTPServerPrometheusMetrics extends TCPPrometheusMetrics impl
   }
 
   @Override
-  public @NotNull HTTPRequestMetrics.Metric responsePushed(@NotNull SocketAddress namedRemoteAddress, @NotNull HttpMethod method, @NotNull String uri, @NotNull HttpServerResponse response) {
-    return requests.begin(namedRemoteAddress, method, uri);
+  public @NotNull HTTPRequestMetrics.Metric responsePushed(@Nullable Void metric, @NotNull HttpMethod method, @NotNull String uri, @NotNull HttpServerResponse response) {
+    return requests.begin(method, uri);
   }
 
   @Override
@@ -44,18 +45,19 @@ public final class HTTPServerPrometheusMetrics extends TCPPrometheusMetrics impl
   }
 
   @Override
-  public @NotNull SocketAddress upgrade(@NotNull HTTPRequestMetrics.Metric metric, @NotNull ServerWebSocket serverWebSocket) {
-    return requests.upgrade(metric);
+  public @Nullable Void upgrade(@NotNull HTTPRequestMetrics.Metric metric, @NotNull ServerWebSocket serverWebSocket) {
+    requests.upgrade(metric);
+    return null;
   }
 
   @Override
-  public @NotNull SocketAddress connected(@NotNull SocketAddress namedRemoteAddress, @NotNull ServerWebSocket serverWebSocket) {
-    websockets.increment(namedRemoteAddress);
-    return namedRemoteAddress;
+  public @Nullable Void connected(@Nullable Void metric, @NotNull ServerWebSocket serverWebSocket) {
+    websockets.increment();
+    return metric;
   }
 
   @Override
-  public void disconnected(@NotNull SocketAddress namedRemoteAddress) {
-    websockets.decrement(namedRemoteAddress);
+  public void disconnected(@Nullable Void metric) {
+    websockets.decrement();
   }
 }
