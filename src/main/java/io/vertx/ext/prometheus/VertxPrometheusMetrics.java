@@ -158,12 +158,12 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
 
     @Override
     public void deployed(@NotNull Verticle verticle) {
-      collector.labels(verticle.getClass().toString()).inc();
+      collector.labels(verticle.getClass().getName()).inc();
     }
 
     @Override
     public void undeployed(@NotNull Verticle verticle) {
-      collector.labels(verticle.getClass().toString()).dec();
+      collector.labels(verticle.getClass().getName()).dec();
     }
   }
 

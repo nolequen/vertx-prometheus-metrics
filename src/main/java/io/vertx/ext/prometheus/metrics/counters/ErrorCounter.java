@@ -1,7 +1,6 @@
 package io.vertx.ext.prometheus.metrics.counters;
 
 import io.prometheus.client.Counter;
-import io.vertx.core.net.SocketAddress;
 import org.jetbrains.annotations.NotNull;
 import io.vertx.ext.prometheus.metrics.PrometheusMetrics;
 

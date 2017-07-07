@@ -3,7 +3,6 @@ package io.vertx.ext.prometheus.metrics.counters;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.prometheus.metrics.Stopwatch;
 import org.jetbrains.annotations.NotNull;
 import io.vertx.ext.prometheus.metrics.PrometheusMetrics;
