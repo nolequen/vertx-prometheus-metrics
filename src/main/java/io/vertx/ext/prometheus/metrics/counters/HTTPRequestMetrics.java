@@ -45,7 +45,7 @@ public final class HTTPRequestMetrics {
   public void responseEnd(@NotNull Metric metric, int responseStatusCode) {
     proocessTime.apply(metric.stopwatch);
     requests(metric, "active").dec();
-    requests(metric, "processed").dec();
+    requests(metric, "processed").inc();
     responses(responseStatusCode).inc();
   }
 
