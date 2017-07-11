@@ -27,7 +27,7 @@ public final class BytesCounter {
     return this;
   }
 
-  private void increment( @NotNull String operation, long bytes) {
+  private void increment(@NotNull String operation, long bytes) {
     counter.labels(localAddress, operation).inc(bytes);
   }
 }

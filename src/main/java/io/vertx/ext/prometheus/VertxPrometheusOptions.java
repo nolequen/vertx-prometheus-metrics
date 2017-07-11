@@ -24,6 +24,7 @@ public final class VertxPrometheusOptions extends MetricsOptions {
   private @NotNull CollectorRegistry registry = CollectorRegistry.defaultRegistry;
   private @NotNull String host = DEFAULT_HOST;
   private int port = DEFAULT_PORT;
+  private boolean embeddedServeEnabled;
 
   public VertxPrometheusOptions() {
     super();
@@ -87,6 +88,15 @@ public final class VertxPrometheusOptions extends MetricsOptions {
 
   public @NotNull VertxPrometheusOptions setRegistry(@NotNull CollectorRegistry registry) {
     this.registry = registry;
+    return this;
+  }
+
+  public boolean isEmbeddedServeEnabled() {
+    return embeddedServeEnabled;
+  }
+
+  public @NotNull VertxPrometheusOptions enableEmbeddedServer(boolean enable) {
+    this.embeddedServeEnabled = enable;
     return this;
   }
 
