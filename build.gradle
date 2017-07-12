@@ -1,7 +1,9 @@
-group 'io.vertx'
-version '0.3.4.1'
+group 'su.nlq'
+version '0.13'
 
 apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 sourceCompatibility = 1.8
 
@@ -17,4 +19,68 @@ dependencies {
 
   compile group: 'io.prometheus', name: 'simpleclient', version: '0.0.23'
   compile group: 'io.prometheus', name: 'simpleclient_servlet', version: '0.0.23'
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { final MavenDeployment deployment -> signing.signPom(deployment) }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      pom.project {
+        name 'Vert.x Prometheus Metrics'
+        description 'Prometheus implementation of the Vert.x Metrics SPI'
+        url 'https://github.com/nolequen/vertx-prometheus-metrics'
+        licenses {
+          license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            distribution 'repo'
+          }
+          license {
+            name "Eclipse Public License - v 1.0"
+            url "http://www.eclipse.org/legal/epl-v10.html"
+            distribution 'repo'
+          }
+        }
+        scm {
+          url 'https://github.com/nolequen/vertx-prometheus-metrics'
+          connection 'scm:git:git://github.com/nolequen/vertx-prometheus-metrics.git'
+          developerConnection 'scm:git:ssh://github.com:nolequen/vertx-prometheus-metrics.git'
+        }
+        developers {
+          developer {
+            name "Nolequen"
+            email "nolequen@gmail.com"
+            url "http://www.nlq.su/"
+          }
+        }
+      }
+    }
+  }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+  classifier = 'javadoc'
+  from javadoc.destinationDir
+}
+
+artifacts {
+  archives sourcesJar, javadocJar
+}
+
+signing {
+  sign configurations.archives
 }
