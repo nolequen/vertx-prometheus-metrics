@@ -6,7 +6,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.MetricsOptions;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.net.impl.SocketAddressImpl;
-import io.vertx.ext.prometheus.metrics.MetricsType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -24,7 +23,7 @@ public final class VertxPrometheusOptions extends MetricsOptions {
   private @NotNull CollectorRegistry registry = CollectorRegistry.defaultRegistry;
   private @NotNull String host = DEFAULT_HOST;
   private int port = DEFAULT_PORT;
-  private boolean embeddedServeEnabled;
+  private boolean embeddedServeEnabled = true;
 
   public VertxPrometheusOptions() {
     super();
@@ -58,49 +57,83 @@ public final class VertxPrometheusOptions extends MetricsOptions {
     return entries;
   }
 
+  /**
+   * Prometheus Metrics server address.
+   *
+   * @return server address
+   */
   public @NotNull SocketAddress getAddress() {
     return new SocketAddressImpl(port, host);
   }
 
+  /**
+   * Set embedded Prometheus Metrics server port. Default is {@link VertxPrometheusOptions#DEFAULT_PORT}.
+   */
   public @NotNull VertxPrometheusOptions setPort(int port) {
     this.port = port;
     return this;
   }
 
+  /**
+   * Set embedded Prometheus Metrics server host. Default is {@link VertxPrometheusOptions#DEFAULT_HOST}.
+   */
   public @NotNull VertxPrometheusOptions setHost(@NotNull String host) {
     this.host = host;
     return this;
   }
 
+  /**
+   * Enable metrics by type.
+   */
   public @NotNull VertxPrometheusOptions enable(@NotNull MetricsType metricsType) {
     metrics.add(metricsType);
     return this;
   }
 
+  /**
+   * Disable metrics by type.
+   */
   public @NotNull VertxPrometheusOptions disable(@NotNull MetricsType metricsType) {
     metrics.remove(metricsType);
     return this;
   }
 
+  /**
+   * Check whether metrics are enabled.
+   */
+  public boolean isEnabled(@NotNull MetricsType metricsType) {
+    return metrics.contains(metricsType);
+  }
+
+  /**
+   * Current Prometheus collector registry.
+   *
+   * @return registry
+   */
   public @NotNull CollectorRegistry getRegistry() {
     return registry;
   }
 
+  /**
+   * Set Prometheus collector registry. Default is {@link CollectorRegistry#defaultRegistry}.
+   */
   public @NotNull VertxPrometheusOptions setRegistry(@NotNull CollectorRegistry registry) {
     this.registry = registry;
     return this;
   }
 
+  /**
+   * Check whether embedded server is enabled.
+   */
   public boolean isEmbeddedServeEnabled() {
     return embeddedServeEnabled;
   }
 
+  /**
+   * Enable or disable embedded Prometheus server. Default is {@code true}.
+   */
   public @NotNull VertxPrometheusOptions enableEmbeddedServer(boolean enable) {
     this.embeddedServeEnabled = enable;
     return this;
-  }
-
-  public boolean isEnabled(@NotNull MetricsType metricsType) {
-    return metrics.contains(metricsType);
   }
 }

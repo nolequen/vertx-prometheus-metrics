@@ -9,8 +9,9 @@ import org.jetbrains.annotations.NotNull;
 public final class PoolPrometheusMetrics extends PrometheusMetrics implements PoolMetrics<Stopwatch> {
   private static final @NotNull Gauge states = Gauge.build("vertx_pools", "Pools states")
       .labelNames("type", "name", "state").create();
-  private static final @NotNull Counter time = Counter.build("vertx_pools_time", "Pools time metrics (μs)")
+  private static final @NotNull Counter time = Counter.build("vertx_pools_time", "Pools time metrics (microseconds)")
       .labelNames("type", "name", "state").create();
+
   private final @NotNull String name;
   private final @NotNull String type;
 

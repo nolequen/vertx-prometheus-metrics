@@ -29,7 +29,7 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
       .labelNames("address", "direction", "reason").create();
 
   private static final @NotNull Counter time = Counter
-      .build("vertx_eventbus_messages_time", "Total messages processing time (μs)")
+      .build("vertx_eventbus_messages_time", "Total messages processing time (microseconds)")
       .labelNames("address").create();
 
   private static final @NotNull Counter bytes = Counter
@@ -87,7 +87,7 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
     }
   }
 
-  private static @NotNull String address(@Nullable EventBusPrometheusMetrics.Metric metric) {
+  private static @NotNull String address(@Nullable Metric metric) {
     return metric == null ? "unknown" : metric.address;
   }
 

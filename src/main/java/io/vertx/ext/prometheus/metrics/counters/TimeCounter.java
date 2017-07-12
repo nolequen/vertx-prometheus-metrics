@@ -11,7 +11,7 @@ public final class TimeCounter {
 
   public TimeCounter(@NotNull String name, @NotNull String localAddress) {
     this.localAddress = localAddress;
-    counter = Counter.build("vertx_" + name + "_time", "Processing time (μs)")
+    counter = Counter.build("vertx_" + name + "_time", "Processing time (microseconds)")
         .labelNames("local_address").create();
   }
 

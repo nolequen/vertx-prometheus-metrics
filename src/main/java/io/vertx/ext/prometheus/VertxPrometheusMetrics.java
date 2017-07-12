@@ -23,7 +23,7 @@ import io.vertx.ext.prometheus.server.MetricsServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static io.vertx.ext.prometheus.metrics.MetricsType.*;
+import static io.vertx.ext.prometheus.MetricsType.*;
 
 public final class VertxPrometheusMetrics extends DummyVertxMetrics {
   private final @NotNull Vertx vertx;

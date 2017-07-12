@@ -11,7 +11,7 @@ public final class VertxPrometheusMetricsFactory implements VertxMetricsFactory 
 
   @Override
   public @NotNull VertxMetrics metrics(@NotNull Vertx vertx, @NotNull VertxOptions vertxOptions) {
-    return new VertxPrometheusMetrics(vertx, getOptions(vertxOptions));
+    return new VertxPrometheusMetrics(vertx, asPrometheusOptions(vertxOptions));
   }
 
   @Override
@@ -19,7 +19,7 @@ public final class VertxPrometheusMetricsFactory implements VertxMetricsFactory 
     return new VertxPrometheusOptions();
   }
 
-  private static @NotNull VertxPrometheusOptions getOptions(@NotNull VertxOptions vertxOptions) {
+  private static @NotNull VertxPrometheusOptions asPrometheusOptions(@NotNull VertxOptions vertxOptions) {
     final MetricsOptions metricsOptions = vertxOptions.getMetricsOptions();
     return metricsOptions instanceof VertxPrometheusOptions
         ? (VertxPrometheusOptions) metricsOptions
