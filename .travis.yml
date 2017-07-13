@@ -4,3 +4,7 @@ jdk:
 - oraclejdk8
 
 sudo: false
+
+install: true
+
+script: gradle build
