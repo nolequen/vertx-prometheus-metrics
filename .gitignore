@@ -1,6 +1,8 @@
-/gradle
-/.project
-/.idea
+gradle/
+build/
+.project/
+.idea/
 
 *.iml
 gradlew*
+gradle.properties
