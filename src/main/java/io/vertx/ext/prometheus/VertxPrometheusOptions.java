@@ -23,7 +23,7 @@ public final class VertxPrometheusOptions extends MetricsOptions {
   private @NotNull CollectorRegistry registry = CollectorRegistry.defaultRegistry;
   private @NotNull String host = DEFAULT_HOST;
   private int port = DEFAULT_PORT;
-  private boolean embeddedServeEnabled = true;
+  private boolean embeddedServerEnabled = true;
 
   public VertxPrometheusOptions() {
     super();
@@ -125,15 +125,15 @@ public final class VertxPrometheusOptions extends MetricsOptions {
   /**
    * Check whether embedded server is enabled.
    */
-  public boolean isEmbeddedServeEnabled() {
-    return embeddedServeEnabled;
+  public boolean isEmbeddedServerEnabled() {
+    return embeddedServerEnabled;
   }
 
   /**
    * Enable or disable embedded Prometheus server. Default is {@code true}.
    */
   public @NotNull VertxPrometheusOptions enableEmbeddedServer(boolean enable) {
-    this.embeddedServeEnabled = enable;
+    this.embeddedServerEnabled = enable;
     return this;
   }
 }
