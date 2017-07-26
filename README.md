@@ -34,6 +34,13 @@ final Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
 ));
 ```
 
+## Compatibility matrix
+
+| Metrics    | Vert.x     | Prometheus | 
+| ----------:| ----------:| ----------:|
+| **0.13**   | 3.4.1      | 0.0.23     |
+
+
 ## Options
 
 There some specific options you can use:
