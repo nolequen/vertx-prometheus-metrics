@@ -33,6 +33,7 @@ public final class HTTPClientPrometheusMetrics extends TCPPrometheusMetrics impl
 
   @Override
   public void closeEndpoint(@NotNull String host, int port, @Nullable Void endpoint) {
+    // nothing to do
   }
 
   @Override
@@ -88,6 +89,7 @@ public final class HTTPClientPrometheusMetrics extends TCPPrometheusMetrics impl
 
   @Override
   public void responseBegin(@NotNull HTTPRequestMetrics.Metric requestMetric, @NotNull HttpClientResponse response) {
+    // nothing to do
   }
 
   @Override
