@@ -45,10 +45,10 @@ final Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
 
 There some specific options you can use:
 
-* Enable or disable embedded Prometheus server to expose metrics for Prometheus consumption via HTTP or check its state (enabled by default)
+* Enable or disable embedded server to expose metrics for Prometheus consumption via HTTP or check its state (enabled by default)
 * Specify host and port of the embedded server (`localhost:9090` by default)
 * Enable or disable specific `MetricsType` or check their state (all metrics are enabled by default)
-* Specify which Prometheus `CollectorRegistry` (default one is used unless otherwise specified)
+* Specify which Prometheus `CollectorRegistry` should be used (default one is used unless otherwise specified)
 
 ## Metrics
 
