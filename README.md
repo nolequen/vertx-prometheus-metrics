@@ -27,14 +27,14 @@ You can find latest release on Maven Central.
 compile group: 'su.nlq', name: 'vertx-prometheus-metrics', version: '0.13'
 ```
 
-Now you can enable vertx metrics:
+Now you can set and enable Vert.x metrics:
 ```java
 final Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
     new VertxPrometheusOptions().setEnabled(true)
 ));
 ```
 
-## Compatibility matrix
+## Compatibility
 
 | Metrics    | Vert.x     | Prometheus | 
 | ----------:| ----------:| ----------:|
@@ -48,7 +48,7 @@ There some specific options you can use:
 * Enable or disable embedded server to expose metrics for Prometheus consumption via HTTP or check its state (enabled by default)
 * Specify host and port of the embedded server (`localhost:9090` by default)
 * Enable or disable specific `MetricsType` or check their state (all metrics are enabled by default)
-* Specify which Prometheus `CollectorRegistry` should be used (default one is used unless otherwise specified)
+* Specify which Prometheus `CollectorRegistry` should be used (unless otherwise specified, the default one is used)
 
 ## Metrics
 
