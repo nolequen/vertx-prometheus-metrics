@@ -43,7 +43,7 @@ final Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
 
 ## Options
 
-There some specific options you can use:
+There are some special options you can use:
 
 * Enable or disable embedded server to expose metrics for Prometheus consumption via HTTP or check its state (enabled by default)
 * Specify host and port of the embedded server (`localhost:9090` by default)
