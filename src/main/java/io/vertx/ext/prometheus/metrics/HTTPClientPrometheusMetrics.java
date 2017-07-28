@@ -6,6 +6,7 @@ import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.WebSocket;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
+import io.vertx.ext.prometheus.metrics.counters.Stopwatch;
 import org.jetbrains.annotations.NotNull;
 import io.vertx.ext.prometheus.metrics.counters.EndpointMetrics;
 import io.vertx.ext.prometheus.metrics.counters.HTTPRequestMetrics;

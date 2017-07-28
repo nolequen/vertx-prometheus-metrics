@@ -4,12 +4,13 @@ import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
 import io.vertx.core.spi.metrics.PoolMetrics;
+import io.vertx.ext.prometheus.metrics.counters.Stopwatch;
 import org.jetbrains.annotations.NotNull;
 
 public final class PoolPrometheusMetrics extends PrometheusMetrics implements PoolMetrics<Stopwatch> {
-  private static final @NotNull Gauge states = Gauge.build("vertx_pools", "Pools states")
+  private static final @NotNull Gauge states = Gauge.build("vertx_pool_tasks", "Pool queue metrics")
       .labelNames("type", "name", "state").create();
-  private static final @NotNull Counter time = Counter.build("vertx_pools_time", "Pools time metrics (microseconds)")
+  private static final @NotNull Counter time = Counter.build("vertx_pool_time", "Pool time metrics (us)")
       .labelNames("type", "name", "state").create();
 
   private final @NotNull String name;

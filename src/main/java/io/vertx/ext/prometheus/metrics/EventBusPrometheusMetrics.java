@@ -5,6 +5,7 @@ import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.spi.metrics.EventBusMetrics;
+import io.vertx.ext.prometheus.metrics.counters.Stopwatch;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,19 +23,19 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
 
   private static final @NotNull Gauge messages = Gauge
       .build("vertx_eventbus_messages", "EventBus messages metrics")
-      .labelNames("range", "status", "address").create();
+      .labelNames("range", "state", "address").create();
 
   private static final @NotNull Counter failures = Counter
       .build("vertx_eventbus_failures", "Message handling failures number")
-      .labelNames("address", "direction", "reason").create();
+      .labelNames("address", "type", "reason").create();
 
   private static final @NotNull Counter time = Counter
-      .build("vertx_eventbus_messages_time", "Total messages processing time (microseconds)")
+      .build("vertx_eventbus_messages_time", "Total messages processing time (us)")
       .labelNames("address").create();
 
   private static final @NotNull Counter bytes = Counter
-      .build("vertx_eventbus_data", "Total write/read bytes by address")
-      .labelNames("address", "operation").create();
+      .build("vertx_eventbus_bytes", "Total read/written bytes")
+      .labelNames("address", "type").create();
 
   public EventBusPrometheusMetrics(@NotNull CollectorRegistry registry) {
     super(registry);

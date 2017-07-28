@@ -2,7 +2,6 @@ package io.vertx.ext.prometheus.metrics.counters;
 
 import io.prometheus.client.Counter;
 import io.vertx.ext.prometheus.metrics.PrometheusMetrics;
-import io.vertx.ext.prometheus.metrics.Stopwatch;
 import org.jetbrains.annotations.NotNull;
 
 public final class TimeCounter {
@@ -11,7 +10,7 @@ public final class TimeCounter {
 
   public TimeCounter(@NotNull String name, @NotNull String localAddress) {
     this.localAddress = localAddress;
-    counter = Counter.build("vertx_" + name + "_time", "Processing time (microseconds)")
+    counter = Counter.build("vertx_" + name + "_time", "Processing time (us)")
         .labelNames("local_address").create();
   }
 

@@ -1,7 +1,6 @@
 package io.vertx.ext.prometheus.metrics.counters;
 
 import io.prometheus.client.Gauge;
-import io.vertx.ext.prometheus.metrics.Stopwatch;
 import org.jetbrains.annotations.NotNull;
 import io.vertx.ext.prometheus.metrics.PrometheusMetrics;
 
@@ -12,9 +11,9 @@ public final class EndpointMetrics {
 
   public EndpointMetrics(@NotNull String name, @NotNull String localAddress) {
     this.localAddress = localAddress;
-    gauge = Gauge.build("vertx_" + name + "_endpoints", "Endpoints metrics")
-        .labelNames("local_address", "counter").create();
-    queueTime = new TimeCounter(name + "_endpoint_queue", localAddress);
+    gauge = Gauge.build("vertx_" + name + "_endpoints", "Endpoints number")
+        .labelNames("local_address", "state").create();
+    queueTime = new TimeCounter(name + "_endpoints_queue", localAddress);
   }
 
   public @NotNull EndpointMetrics register(@NotNull PrometheusMetrics metrics) {
@@ -24,20 +23,20 @@ public final class EndpointMetrics {
   }
 
   public void increment() {
-    gauge("connections").inc();
+    gauge("established").inc();
   }
 
   public void decrement() {
-    gauge("connections").dec();
+    gauge("established").dec();
   }
 
   public @NotNull Stopwatch enqueue() {
-    gauge("queue-size").inc();
+    gauge("queued").inc();
     return new Stopwatch();
   }
 
   public void dequeue(@NotNull Stopwatch stopwatch) {
-    gauge("queue-size").dec();
+    gauge("queued").dec();
     queueTime.apply(stopwatch);
   }
 

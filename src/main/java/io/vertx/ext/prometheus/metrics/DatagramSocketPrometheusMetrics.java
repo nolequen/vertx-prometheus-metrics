@@ -1,22 +1,29 @@
 package io.vertx.ext.prometheus.metrics;
 
 import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Counter;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.core.spi.metrics.DatagramSocketMetrics;
+import io.vertx.ext.prometheus.metrics.counters.BytesCounter;
+import io.vertx.ext.prometheus.metrics.counters.ErrorCounter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Supplier;
+
 public final class DatagramSocketPrometheusMetrics extends PrometheusMetrics implements DatagramSocketMetrics {
-  private final @NotNull Counter counter = Counter.build("vertx_datagram_socket", "Datagram socket metrics")
-      .labelNames("type", "local_address").create();
+  private static final @NotNull String NAME = "datagram_socket";
+
+  private final @NotNull BytesCounter bytes;
+  private final @NotNull ErrorCounter errors;
 
   private volatile @Nullable SocketAddress namedLocalAddress;
 
   public DatagramSocketPrometheusMetrics(@NotNull CollectorRegistry registry) {
     super(registry);
-    register(counter);
+    final Supplier<String> localAddress = () -> String.valueOf(namedLocalAddress);
+    bytes = new BytesCounter(NAME, localAddress).register(this);
+    errors = new ErrorCounter(NAME, localAddress).register(this);
   }
 
   @Override
@@ -26,20 +33,16 @@ public final class DatagramSocketPrometheusMetrics extends PrometheusMetrics imp
 
   @Override
   public void bytesRead(@Nullable Void socketMetric, @NotNull SocketAddress remoteAddress, long numberOfBytes) {
-    counter("received").inc(numberOfBytes);
+    bytes.read(numberOfBytes);
   }
 
   @Override
   public void bytesWritten(@Nullable Void socketMetric, @NotNull SocketAddress remoteAddress, long numberOfBytes) {
-    counter("sent").inc(numberOfBytes);
+    bytes.read(numberOfBytes);
   }
 
   @Override
   public void exceptionOccurred(@Nullable Void socketMetric, @NotNull SocketAddress remoteAddress, @NotNull Throwable throwable) {
-    counter("errors").inc();
-  }
-
-  private @NotNull Counter.Child counter(@NotNull String type) {
-    return counter.labels(type, String.valueOf(namedLocalAddress));
+    errors.increment(throwable);
   }
 }

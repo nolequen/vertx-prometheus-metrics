@@ -1,4 +1,4 @@
-package io.vertx.ext.prometheus.metrics;
+package io.vertx.ext.prometheus.metrics.counters;
 
 import java.util.concurrent.TimeUnit;
 
