@@ -2,10 +2,8 @@
 
 [![Build Status](https://img.shields.io/travis/nolequen/vertx-prometheus-metrics.svg?branch=master&style=flat-square)](https://travis-ci.org/nolequen/vertx-prometheus-metrics)
 [![Maven Central](https://img.shields.io/maven-central/v/su.nlq/vertx-prometheus-metrics.svg?style=flat-square)](https://maven-badges.herokuapp.com/maven-central/su.nlq/vertx-prometheus-metrics)
-[![GitHub release](https://img.shields.io/github/release/nolequen/vertx-prometheus-metrics.svg?style=flat-square)](https://github.com/nolequen/vertx-prometheus-metrics/releases/latest)
 [![Dependency Status](https://www.versioneye.com/user/projects/596d0ea90fb24f00558fe198/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/596d0ea90fb24f00558fe198)
 [![Codacy Badge](https://img.shields.io/codacy/03b7a792c7e44d41a19596665ba12d27.svg?style=flat-square)](https://www.codacy.com/app/nolequen/vertx-prometheus-metrics?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nolequen/vertx-prometheus-metrics&amp;utm_campaign=Badge_Grade)
-[![License](http://img.shields.io/:license-apache-brightgreen.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 [Prometheus](https://prometheus.io/) implementation of the [Vert.x Metrics SPI](http://vertx.io/docs/vertx-core/java/index.html#_metrics_spi).
 
@@ -52,4 +50,63 @@ There are some special options you can use:
 
 ## Metrics
 
-to be described...
+The following metrics are provided.
+
+### Vert.x metrics
+
+* `vertx_timers_number` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the number of timers by state
+* `vertx_verticle_number` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the currently deployed verticles number by class
+
+### Event bus metrics
+
+* `vertx_eventbus_handlers` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the registered message handlers number
+* `vertx_eventbus_respondents` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the registered message reply-handlers number
+* `vertx_eventbus_messages` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the number of messages by range (local or remote), state and address
+* `vertx_eventbus_failures` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the number of messages handling failures by address, message type and reason
+* `vertx_eventbus_messages_time` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) representing the total processing time (μs) of the messages by address and type
+* `vertx_eventbus_bytes` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the read\written bytes number by address
+
+### HTTP server metrics
+
+* `vertx_httpserver_requests` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the number of processing requests by address, HTTP method, path and state
+* `vertx_httpserver_responses` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the responses number by address and status code
+* `vertx_httpserver_requests_time` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the total processing time (μs) of the requests by address
+* `vertx_httpserver_websockets` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the number of the connected websockets    
+* `vertx_httpserver_connections` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the active connections number
+* `vertx_httpserver_bytes` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the read\written bytes number by address
+* `vertx_httpserver_errors` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the number of errors occurred by address
+
+### HTTP client metrics
+
+* `vertx_httpclient_endpoints` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of endpoints number by address and state
+* `vertx_httpclient_endpoint_queue_time` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the total queue time (μs) of pending endpoints
+* `vertx_httpclient_requests` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the number of processing requests by address, HTTP method, path and state
+* `vertx_httpclient_requests_time` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the total processing time (μs) of the requests by address
+* `vertx_httpclient_responses` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the responses number by address and status code
+* `vertx_httpclient_websockets` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the number of the connected websockets
+* `vertx_httpclient_connections` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the active connections number
+* `vertx_httpclient_bytes` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the read\written bytes number by address
+* `vertx_httpclient_errors` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the number of errors occurred by address
+
+### Net server metrics
+
+* `vertx_netserver_connections` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the active connections number
+* `vertx_netserver_bytes` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the read\written bytes number by address
+* `vertx_netserver_errors` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the number of errors occurred by address
+
+### Net client metrics
+
+* `vertx_netclient_connections` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the active connections number
+* `vertx_netclient_bytes` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the read\written bytes number by address
+* `vertx_netclient_errors` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the number of errors occurred by address
+
+
+### Datagram socket metrics
+
+* `vertx_datagram_socket_bytes` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the read\written bytes number by address
+* `vertx_datagram_socket_errors` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the number of errors occurred by address
+
+### Pool metrics
+
+* `vertx_pool_tasks` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the number of processing tasks by pool and state
+* `vertx_pool_time` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) representing the total processing time (μs) of the tasks in a certain state
