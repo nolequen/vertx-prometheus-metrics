@@ -6,16 +6,16 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TimeCounter {
   private final @NotNull Counter counter;
-  private final @NotNull String localAddress;
+  private final @NotNull Counter.Child time;
 
   public TimeCounter(@NotNull String name, @NotNull String localAddress) {
-    this.localAddress = localAddress;
     counter = Counter.build("vertx_" + name + "_time", "Processing time (us)")
         .labelNames("local_address").create();
+    time = counter.labels(localAddress);
   }
 
   public void apply(@NotNull Stopwatch stopwatch) {
-    counter.labels(localAddress).inc(stopwatch.stop());
+    time.inc(stopwatch.stop());
   }
 
   public @NotNull TimeCounter register(@NotNull PrometheusMetrics metrics) {

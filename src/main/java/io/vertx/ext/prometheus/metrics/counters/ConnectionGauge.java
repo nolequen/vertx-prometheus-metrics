@@ -6,20 +6,20 @@ import org.jetbrains.annotations.NotNull;
 
 public final class ConnectionGauge {
   private final @NotNull Gauge gauge;
-  private final @NotNull String localAddress;
+  private final @NotNull Gauge.Child connections;
 
   public ConnectionGauge(@NotNull String name, @NotNull String localAddress) {
-    this.localAddress = localAddress;
     gauge = Gauge.build("vertx_" + name + "_connections", "Active connections number")
         .labelNames("local_address").create();
+    connections = gauge.labels(localAddress);
   }
 
   public void connected() {
-    gauge.labels(localAddress).inc();
+    connections.inc();
   }
 
   public void disconnected() {
-    gauge.labels(localAddress).dec();
+    connections.dec();
   }
 
   public @NotNull ConnectionGauge register(@NotNull PrometheusMetrics metrics) {

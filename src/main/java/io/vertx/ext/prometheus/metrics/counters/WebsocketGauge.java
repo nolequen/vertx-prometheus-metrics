@@ -1,25 +1,25 @@
 package io.vertx.ext.prometheus.metrics.counters;
 
 import io.prometheus.client.Gauge;
-import org.jetbrains.annotations.NotNull;
 import io.vertx.ext.prometheus.metrics.PrometheusMetrics;
+import org.jetbrains.annotations.NotNull;
 
 public final class WebsocketGauge {
   private final @NotNull Gauge gauge;
-  private final @NotNull String localAddress;
+  private final @NotNull Gauge.Child websockets;
 
   public WebsocketGauge(@NotNull String name, @NotNull String localAddress) {
-    this.localAddress = localAddress;
     gauge = Gauge.build("vertx_" + name + "_websockets", "Websockets number")
         .labelNames("local_address").create();
+    websockets = gauge.labels(localAddress);
   }
 
   public void increment() {
-    gauge.labels(localAddress).inc();
+    websockets.inc();
   }
 
   public void decrement() {
-    gauge.labels(localAddress).dec();
+    websockets.dec();
   }
 
   public @NotNull WebsocketGauge register(@NotNull PrometheusMetrics metrics) {
