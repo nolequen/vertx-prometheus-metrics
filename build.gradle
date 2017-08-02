@@ -12,16 +12,13 @@ repositories {
 }
 
 dependencies {
-  final def prometheus_version = '0.0.25'
-  final def vertx_version = '3.4.2'
-  
   compile group: 'org.jetbrains', name: 'annotations', version: '15.0'
 
-  compile group: 'io.vertx', name: 'vertx-core', version: vertx_version
-  compile group: 'io.vertx', name: 'vertx-web', version: vertx_version
+  compile group: 'io.vertx', name: 'vertx-core', version: '3.4.2'
+  compile group: 'io.vertx', name: 'vertx-web', version: '3.4.2'
 
-  compile group: 'io.prometheus', name: 'simpleclient', version: prometheus_version
-  compile group: 'io.prometheus', name: 'simpleclient_servlet', version: prometheus_version
+  compile group: 'io.prometheus', name: 'simpleclient', version: '0.0.25'
+  compile group: 'io.prometheus', name: 'simpleclient_servlet', version: '0.0.25'
 }
 
 uploadArchives {
