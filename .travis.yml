@@ -8,3 +8,6 @@ sudo: false
 install: true
 
 script: gradle build -x signArchives
+
+notifications:
+  email: false
