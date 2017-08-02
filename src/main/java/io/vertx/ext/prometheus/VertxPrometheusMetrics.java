@@ -13,6 +13,7 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.metrics.impl.DummyVertxMetrics;
+import io.vertx.core.net.NetClient;
 import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.SocketAddress;
@@ -95,10 +96,10 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
   }
 
   @Override
-  public @NotNull TCPMetrics<?> createMetrics(@NotNull NetClientOptions netClientOptions) {
+  public @NotNull TCPMetrics<?> createMetrics(@NotNull NetClient client, @NotNull NetClientOptions netClientOptions) {
     return options.isEnabled(NetClient)
         ? new NetClientPrometheusMetrics(options.getRegistry(), getLocalAddress(netClientOptions.getLocalAddress()))
-        : super.createMetrics(netClientOptions);
+        : super.createMetrics(client, netClientOptions);
   }
 
   @Override
