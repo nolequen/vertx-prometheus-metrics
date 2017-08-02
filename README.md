@@ -36,7 +36,7 @@ final Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
 
 | Metrics    | Vert.x     | Prometheus | 
 | ----------:| ----------:| ----------:|
-| **0.13.x**   | 3.4.1      | 0.0.23     |
+| **0.13.x** | 3.4.1      | 0.0.23     |
 
 
 ## Options
