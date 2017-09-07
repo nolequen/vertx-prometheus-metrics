@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public final class EventBusPrometheusMetrics extends PrometheusMetrics implements EventBusMetrics<EventBusPrometheusMetrics.Metric> {
 
@@ -23,19 +24,23 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
 
   private static final @NotNull Gauge messages = Gauge
       .build("vertx_eventbus_messages", "EventBus messages metrics")
-      .labelNames("range", "state", "address").create();
+      .labelNames("range", "state", "address")
+      .create();
 
   private static final @NotNull Counter failures = Counter
       .build("vertx_eventbus_failures", "Message handling failures number")
-      .labelNames("address", "type", "reason").create();
+      .labelNames("address", "type", "reason")
+      .create();
 
   private static final @NotNull Counter time = Counter
       .build("vertx_eventbus_messages_time", "Total messages processing time (us)")
-      .labelNames("address").create();
+      .labelNames("address")
+      .create();
 
   private static final @NotNull Counter bytes = Counter
       .build("vertx_eventbus_bytes", "Total read/written bytes")
-      .labelNames("address", "type").create();
+      .labelNames("address", "type")
+      .create();
 
   public EventBusPrometheusMetrics(@NotNull CollectorRegistry registry) {
     super(registry);
@@ -81,15 +86,11 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
   @Override
   public void endHandleMessage(@Nullable Metric metric, @Nullable Throwable failure) {
     if (metric != null) {
-      time.labels(metric.address).inc(metric.stopwatch.stop());
+      time.labels(safe(metric.address)).inc(metric.stopwatch.stop());
     }
     if (failure != null) {
-      failures.labels(address(metric), "request", failure.getClass().getSimpleName()).inc();
+      failures.labels(safe(address(metric)), "request", failure.getClass().getSimpleName()).inc();
     }
-  }
-
-  private static @NotNull String address(@Nullable Metric metric) {
-    return metric == null ? "unknown" : metric.address;
   }
 
   @Override
@@ -108,21 +109,38 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
 
   @Override
   public void messageWritten(@NotNull String address, int numberOfBytes) {
-    bytes.labels(address, "write").inc(numberOfBytes);
+    bytes(address, "write").inc(numberOfBytes);
   }
 
   @Override
   public void messageRead(@NotNull String address, int numberOfBytes) {
-    bytes.labels(address, "read").inc(numberOfBytes);
+    bytes(address, "read").inc(numberOfBytes);
   }
 
   @Override
   public void replyFailure(@NotNull String address, @NotNull ReplyFailure failure) {
-    failures.labels(address, "reply", failure.name()).inc();
+    failures.labels(safe(address), "reply", failure.name()).inc();
+  }
+
+  private static @NotNull Counter.Child bytes(@NotNull String address, @NotNull String type) {
+    return bytes.labels(safe(address), type);
+  }
+
+  private static @NotNull String address(@Nullable Metric metric) {
+    return metric == null ? "unknown" : metric.address;
   }
 
   private static @NotNull Gauge.Child messages(@NotNull String address, boolean local, @NotNull String state) {
-    return messages.labels(local ? "local" : "remote", state, address);
+    return messages.labels(local ? "local" : "remote", state, safe(address));
+  }
+
+  private static @NotNull String safe(@NotNull String address) {
+    try {
+      UUID.fromString(address);
+      return "generated";
+    } catch (IllegalArgumentException ignore) {
+      return address;
+    }
   }
 
   public static final class Metric {
