@@ -137,7 +137,7 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
   private static @NotNull String safe(@NotNull String address) {
     try {
       UUID.fromString(address);
-      return "generated";
+      return "vertx-generated-respondent";
     } catch (IllegalArgumentException ignore) {
       return address;
     }
