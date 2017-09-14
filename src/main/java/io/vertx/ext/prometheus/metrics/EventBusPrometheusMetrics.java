@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
-import java.util.UUID;
+import java.util.regex.Pattern;
 
 public final class EventBusPrometheusMetrics extends PrometheusMetrics implements EventBusMetrics<EventBusPrometheusMetrics.Metric> {
 
@@ -86,10 +86,10 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
   @Override
   public void endHandleMessage(@Nullable Metric metric, @Nullable Throwable failure) {
     if (metric != null) {
-      time.labels(safe(metric.address)).inc(metric.stopwatch.stop());
+      time.labels(AddressResolver.instance.apply(metric.address)).inc(metric.stopwatch.stop());
     }
     if (failure != null) {
-      failures.labels(safe(address(metric)), "request", failure.getClass().getSimpleName()).inc();
+      failures.labels(AddressResolver.instance.apply(address(metric)), "request", failure.getClass().getSimpleName()).inc();
     }
   }
 
@@ -119,11 +119,11 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
 
   @Override
   public void replyFailure(@NotNull String address, @NotNull ReplyFailure failure) {
-    failures.labels(safe(address), "reply", failure.name()).inc();
+    failures.labels(AddressResolver.instance.apply(address), "reply", failure.name()).inc();
   }
 
   private static @NotNull Counter.Child bytes(@NotNull String address, @NotNull String type) {
-    return bytes.labels(safe(address), type);
+    return bytes.labels(AddressResolver.instance.apply(address), type);
   }
 
   private static @NotNull String address(@Nullable Metric metric) {
@@ -131,17 +131,9 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
   }
 
   private static @NotNull Gauge.Child messages(@NotNull String address, boolean local, @NotNull String state) {
-    return messages.labels(local ? "local" : "remote", state, safe(address));
+    return messages.labels(local ? "local" : "remote", state, AddressResolver.instance.apply(address));
   }
 
-  private static @NotNull String safe(@NotNull String address) {
-    try {
-      UUID.fromString(address);
-      return "vertx-generated-respondent";
-    } catch (IllegalArgumentException ignore) {
-      return address;
-    }
-  }
 
   public static final class Metric {
     private final @NotNull String address;
@@ -151,6 +143,23 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
     public Metric(@NotNull String address, @NotNull Optional<String> respondent) {
       this.address = address;
       this.respondent = respondent;
+    }
+  }
+
+  private static final class AddressResolver {
+    public static final @NotNull AddressResolver instance = new AddressResolver();
+
+    private static final @NotNull Pattern NUMBER_PATTERN = Pattern.compile("^\\d+$");
+    private static final @NotNull String GENERATED_ADDRESS = "vertx-generated-address";
+
+    public @NotNull String apply(@NotNull String address) {
+      if (NUMBER_PATTERN.matcher(address).matches()) {
+        return GENERATED_ADDRESS;
+      }
+      if (address.split("-").length == 5) {
+        return GENERATED_ADDRESS;
+      }
+      return address;
     }
   }
 }
