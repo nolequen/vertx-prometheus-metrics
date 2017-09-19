@@ -19,6 +19,7 @@ dependencies {
 
   compile group: 'io.prometheus', name: 'simpleclient', version: '0.0.26'
   compile group: 'io.prometheus', name: 'simpleclient_servlet', version: '0.0.26'
+  compile group: 'io.prometheus', name: 'simpleclient_common', version: '0.0.26'
 }
 
 uploadArchives {
