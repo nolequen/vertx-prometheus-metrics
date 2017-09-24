@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 
 public final class VertxPrometheusOptions extends MetricsOptions {
-  private static final @NotNull JsonArray EMPTY_METRICS = new JsonArray(Collections.emptyList());
+  private static final @NotNull JsonArray EMPTY_METRICS = new JsonArray();
 
   private static final @NotNull String DEFAULT_HOST = "localhost";
   private static final int DEFAULT_PORT = 9090;
@@ -44,7 +44,7 @@ public final class VertxPrometheusOptions extends MetricsOptions {
     port = json.getInteger("port", DEFAULT_PORT);
     metrics = EnumSet.noneOf(MetricsType.class);
     for (Object metric : json.getJsonArray("metrics", EMPTY_METRICS).getList()) {
-      metrics.add((MetricsType) metric);
+      metrics.add(MetricsType.valueOf(metric.toString()));
     }
   }
 
