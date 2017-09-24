@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 
 public final class VertxPrometheusOptions extends MetricsOptions {
-  private static final @NotNull JsonArray EMPTY_METRICS = new JsonArray();
+  private static final @NotNull JsonArray EMPTY_METRICS = new JsonArray(Collections.emptyList());
 
   private static final @NotNull String DEFAULT_HOST = "localhost";
   private static final int DEFAULT_PORT = 9090;
