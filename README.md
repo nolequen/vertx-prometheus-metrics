@@ -47,6 +47,7 @@ There are some special options you can use:
 * Specify host and port of the embedded server (`localhost:9090` by default)
 * Enable or disable specific `MetricsType` or check their state (all metrics are enabled by default)
 * Specify which Prometheus `CollectorRegistry` should be used (unless otherwise specified, the default one is used)
+* Specify the Prometheus `exposition format` (the default is `Text format`) 
 
 ## Metrics
 
