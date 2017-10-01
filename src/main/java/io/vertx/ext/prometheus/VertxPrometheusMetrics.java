@@ -42,7 +42,10 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
   @Override
   public void eventBusInitialized(@NotNull EventBus bus) {
     if (options.isEmbeddedServerEnabled()) {
-      server = MetricsServer.create(vertx).apply(options.getRegistry()).apply(options.getAddress());
+      server = MetricsServer
+          .create(vertx)
+          .apply(options.getRegistry(), options.getFormat())
+          .apply(options.getAddress());
     }
   }
 
