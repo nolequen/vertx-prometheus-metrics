@@ -6,6 +6,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.MetricsOptions;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.net.impl.SocketAddressImpl;
+import io.vertx.ext.prometheus.server.ExpositionFormat;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ public final class VertxPrometheusOptions extends MetricsOptions {
   private final @NotNull EnumSet<MetricsType> metrics;
 
   private @NotNull CollectorRegistry registry = CollectorRegistry.defaultRegistry;
+  private @NotNull ExpositionFormat format = ExpositionFormat.Text;
   private @NotNull String host = DEFAULT_HOST;
   private int port = DEFAULT_PORT;
   private boolean embeddedServerEnabled = true;
@@ -44,7 +46,7 @@ public final class VertxPrometheusOptions extends MetricsOptions {
     port = json.getInteger("port", DEFAULT_PORT);
     metrics = EnumSet.noneOf(MetricsType.class);
     for (Object metric : json.getJsonArray("metrics", EMPTY_METRICS).getList()) {
-      metrics.add((MetricsType) metric);
+      metrics.add(MetricsType.valueOf(metric.toString()));
     }
   }
 
@@ -68,6 +70,9 @@ public final class VertxPrometheusOptions extends MetricsOptions {
 
   /**
    * Set embedded Prometheus Metrics server port. Default is {@link VertxPrometheusOptions#DEFAULT_PORT}.
+   *
+   * @param port metrics server port
+   * @return a reference to this, so the API can be used fluently
    */
   public @NotNull VertxPrometheusOptions setPort(int port) {
     this.port = port;
@@ -76,6 +81,9 @@ public final class VertxPrometheusOptions extends MetricsOptions {
 
   /**
    * Set embedded Prometheus Metrics server host. Default is {@link VertxPrometheusOptions#DEFAULT_HOST}.
+   *
+   * @param host metrics server host
+   * @return a reference to this, so the API can be used fluently
    */
   public @NotNull VertxPrometheusOptions setHost(@NotNull String host) {
     this.host = host;
@@ -84,25 +92,34 @@ public final class VertxPrometheusOptions extends MetricsOptions {
 
   /**
    * Enable metrics by type.
+   *
+   * @param type metrics type to enable
+   * @return a reference to this, so the API can be used fluently
    */
-  public @NotNull VertxPrometheusOptions enable(@NotNull MetricsType metricsType) {
-    metrics.add(metricsType);
+  public @NotNull VertxPrometheusOptions enable(@NotNull MetricsType type) {
+    metrics.add(type);
     return this;
   }
 
   /**
    * Disable metrics by type.
+   *
+   * @param type metrics type to disable
+   * @return a reference to this, so the API can be used fluently
    */
-  public @NotNull VertxPrometheusOptions disable(@NotNull MetricsType metricsType) {
-    metrics.remove(metricsType);
+  public @NotNull VertxPrometheusOptions disable(@NotNull MetricsType type) {
+    metrics.remove(type);
     return this;
   }
 
   /**
    * Check whether metrics are enabled.
+   *
+   * @param type metrics type to check
+   * @return a reference to this, so the API can be used fluently
    */
-  public boolean isEnabled(@NotNull MetricsType metricsType) {
-    return metrics.contains(metricsType);
+  public boolean isEnabled(@NotNull MetricsType type) {
+    return metrics.contains(type);
   }
 
   /**
@@ -116,6 +133,9 @@ public final class VertxPrometheusOptions extends MetricsOptions {
 
   /**
    * Set Prometheus collector registry. Default is {@link CollectorRegistry#defaultRegistry}.
+   *
+   * @param registry the Prometheus collector registry
+   * @return a reference to this, so the API can be used fluently
    */
   public @NotNull VertxPrometheusOptions setRegistry(@NotNull CollectorRegistry registry) {
     this.registry = registry;
@@ -124,6 +144,8 @@ public final class VertxPrometheusOptions extends MetricsOptions {
 
   /**
    * Check whether embedded server is enabled.
+   *
+   * @return true if embedded server is enabled
    */
   public boolean isEmbeddedServerEnabled() {
     return embeddedServerEnabled;
@@ -131,9 +153,32 @@ public final class VertxPrometheusOptions extends MetricsOptions {
 
   /**
    * Enable or disable embedded Prometheus server. Default is {@code true}.
+   *
+   * @param enable or disable the embedded server
+   * @return a reference to this, so the API can be used fluently
    */
   public @NotNull VertxPrometheusOptions enableEmbeddedServer(boolean enable) {
     this.embeddedServerEnabled = enable;
+    return this;
+  }
+
+  /**
+   * Prometheus exposition format for embedded server.
+   *
+   * @return registry
+   */
+  public @NotNull ExpositionFormat getFormat() {
+    return format;
+  }
+
+  /**
+   * Set Prometheus exposition format for embedded server. Default is {@link ExpositionFormat#Text}.
+   *
+   * @param format Prometheus exposition format
+   * @return a reference to this, so the API can be used fluently
+   */
+  public @NotNull VertxPrometheusOptions setFormat(@NotNull ExpositionFormat format) {
+    this.format = format;
     return this;
   }
 }
