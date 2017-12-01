@@ -1,5 +1,5 @@
 group 'su.nlq'
-version '0.15'
+version '0.15.1'
 
 apply plugin: 'java'
 apply plugin: 'maven'
