@@ -5,12 +5,12 @@ import io.prometheus.client.CollectorRegistry;
 import io.vertx.core.spi.metrics.Metrics;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public abstract class PrometheusMetrics implements Metrics {
   private final @NotNull CollectorRegistry registry;
-  private final @NotNull Map<Collector, Collector> collectors = new HashMap<>();
+  private final @NotNull Collection<Collector> collectors = new ArrayList<>();
 
   protected PrometheusMetrics(@NotNull CollectorRegistry registry) {
     this.registry = registry;
@@ -23,13 +23,15 @@ public abstract class PrometheusMetrics implements Metrics {
 
   @Override
   public final void close() {
-    collectors.keySet().forEach(registry::unregister);
+    collectors.forEach(registry::unregister);
     collectors.clear();
   }
 
   public final void register(@NotNull Collector collector) {
-    if (collectors.put(collector, collector) == null) {
+    try {
       registry.register(collector);
+      collectors.add(collector);
+    } catch (IllegalArgumentException ignore) {
     }
   }
 }
