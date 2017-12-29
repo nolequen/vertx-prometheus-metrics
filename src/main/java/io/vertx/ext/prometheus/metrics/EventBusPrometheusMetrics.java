@@ -3,9 +3,11 @@ package io.vertx.ext.prometheus.metrics;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
+import io.prometheus.client.Summary;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.spi.metrics.EventBusMetrics;
 import io.vertx.ext.prometheus.metrics.counters.Stopwatch;
+import io.vertx.ext.prometheus.metrics.counters.TimeCounter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,8 +34,8 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
       .labelNames("address", "type", "reason")
       .create();
 
-  private static final @NotNull Counter time = Counter
-      .build("vertx_eventbus_messages_time", "Total messages processing time (us)")
+  private static final @NotNull Summary time = new TimeCounter.SummaryBuilder()
+      .get("vertx_eventbus_messages_time_us", "Total messages processing time (us)")
       .labelNames("address")
       .create();
 
@@ -86,7 +88,7 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
   @Override
   public void endHandleMessage(@Nullable Metric metric, @Nullable Throwable failure) {
     if (metric != null) {
-      time.labels(AddressResolver.instance.apply(metric.address)).inc(metric.stopwatch.stop());
+      time.labels(AddressResolver.instance.apply(metric.address)).observe(metric.stopwatch.stop());
     }
     if (failure != null) {
       failures.labels(AddressResolver.instance.apply(address(metric)), "request", failure.getClass().getSimpleName()).inc();

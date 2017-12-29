@@ -65,14 +65,14 @@ The following metrics are provided.
 * `vertx_eventbus_respondents` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the registered message reply-handlers number
 * `vertx_eventbus_messages` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the number of messages by range (local or remote), state and address
 * `vertx_eventbus_failures` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the number of messages handling failures by address, message type and reason
-* `vertx_eventbus_messages_time` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) representing the total processing time (μs) of the messages by address and type
+* `vertx_eventbus_messages_time_us` - [summary](https://prometheus.io/docs/concepts/metric_types/#summary) representing the total processing time (μs) of the messages by address and type
 * `vertx_eventbus_bytes` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the read\written bytes number by address
 
 ### HTTP server metrics
 
 * `vertx_httpserver_requests` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the number of processing requests by address, HTTP method, path and state
 * `vertx_httpserver_responses` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the responses number by address and status code
-* `vertx_httpserver_requests_time` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the total processing time (μs) of the requests by address
+* `vertx_httpserver_requests_time_us` - [summary](https://prometheus.io/docs/concepts/metric_types/#summary) of the total processing time (μs) of the requests by address
 * `vertx_httpserver_websockets` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the number of the connected websockets    
 * `vertx_httpserver_connections` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the active connections number
 * `vertx_httpserver_bytes` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the read\written bytes number by address
@@ -81,9 +81,9 @@ The following metrics are provided.
 ### HTTP client metrics
 
 * `vertx_httpclient_endpoints` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of endpoints number by address and state
-* `vertx_httpclient_endpoint_queue_time` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the total queue time (μs) of pending endpoints
+* `vertx_httpclient_endpoint_queue_time_us` - [summary](https://prometheus.io/docs/concepts/metric_types/#summary) of the total queue time (μs) of pending endpoints
 * `vertx_httpclient_requests` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the number of processing requests by address, HTTP method, path and state
-* `vertx_httpclient_requests_time` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the total processing time (μs) of the requests by address
+* `vertx_httpclient_requests_time_us` - [summary](https://prometheus.io/docs/concepts/metric_types/#summary) of the total processing time (μs) of the requests by address
 * `vertx_httpclient_responses` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the responses number by address and status code
 * `vertx_httpclient_websockets` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the number of the connected websockets
 * `vertx_httpclient_connections` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the active connections number
@@ -111,4 +111,4 @@ The following metrics are provided.
 ### Pool metrics
 
 * `vertx_pool_tasks` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the number of processing tasks by pool and state
-* `vertx_pool_time` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) representing the total processing time (μs) of the tasks in a certain state
+* `vertx_pool_time_us` - [summary](https://prometheus.io/docs/concepts/metric_types/#summary) representing the total processing time (μs) of the tasks in a certain state
