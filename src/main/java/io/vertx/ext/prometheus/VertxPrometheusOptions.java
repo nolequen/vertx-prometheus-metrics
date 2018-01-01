@@ -68,6 +68,12 @@ public final class VertxPrometheusOptions extends MetricsOptions {
     return new SocketAddressImpl(port, host);
   }
 
+  @Override
+  public @NotNull VertxPrometheusOptions setEnabled(boolean enable) {
+    super.setEnabled(enable);
+    return this;
+  }
+
   /**
    * Set embedded Prometheus Metrics server port. Default is {@link VertxPrometheusOptions#DEFAULT_PORT}.
    *
