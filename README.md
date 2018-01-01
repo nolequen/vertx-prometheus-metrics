@@ -81,7 +81,7 @@ The following metrics are provided.
 ### HTTP client metrics
 
 * `vertx_httpclient_endpoints` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of endpoints number by address and state
-* `vertx_httpclient_endpoint_queue_time_us` - [summary](https://prometheus.io/docs/concepts/metric_types/#summary) of the total queue time (μs) of pending endpoints
+* `vertx_httpclient_endpoints_queue_time_us` - [summary](https://prometheus.io/docs/concepts/metric_types/#summary) of the total queue time (μs) of pending endpoints
 * `vertx_httpclient_requests` - [gauge](https://prometheus.io/docs/concepts/metric_types/#gauge) of the number of processing requests by address, HTTP method, path and state
 * `vertx_httpclient_requests_time_us` - [summary](https://prometheus.io/docs/concepts/metric_types/#summary) of the total processing time (μs) of the requests by address
 * `vertx_httpclient_responses` - [counter](https://prometheus.io/docs/concepts/metric_types/#counter) of the responses number by address and status code
