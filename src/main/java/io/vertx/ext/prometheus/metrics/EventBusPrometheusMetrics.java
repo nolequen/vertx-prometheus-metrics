@@ -16,30 +16,30 @@ import java.util.regex.Pattern;
 
 public final class EventBusPrometheusMetrics extends PrometheusMetrics implements EventBusMetrics<EventBusPrometheusMetrics.Metric> {
 
-  private static final @NotNull Gauge handlers = Gauge
+  private final @NotNull Gauge handlers = Gauge
       .build("vertx_eventbus_handlers", "Message handlers number")
       .create();
 
-  private static final @NotNull Gauge respondents = Gauge
+  private final @NotNull Gauge respondents = Gauge
       .build("vertx_eventbus_respondents", "Reply handlers number")
       .create();
 
-  private static final @NotNull Gauge messages = Gauge
+  private final @NotNull Gauge messages = Gauge
       .build("vertx_eventbus_messages", "EventBus messages metrics")
       .labelNames("range", "state", "address")
       .create();
 
-  private static final @NotNull Counter failures = Counter
+  private final @NotNull Counter failures = Counter
       .build("vertx_eventbus_failures", "Message handling failures number")
       .labelNames("address", "type", "reason")
       .create();
 
-  private static final @NotNull Summary time = new TimeCounter.SummaryBuilder()
+  private final @NotNull Summary time = new TimeCounter.SummaryBuilder()
       .get("vertx_eventbus_messages_time_us", "Total messages processing time (us)")
       .labelNames("address")
       .create();
 
-  private static final @NotNull Counter bytes = Counter
+  private final @NotNull Counter bytes = Counter
       .build("vertx_eventbus_bytes", "Total read/written bytes")
       .labelNames("address", "type")
       .create();
@@ -61,7 +61,6 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
     respondent.ifPresent(r -> respondents.inc());
     return new Metric(address, respondent);
   }
-
 
   @Override
   public void handlerUnregistered(@Nullable Metric metric) {
@@ -124,18 +123,17 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
     failures.labels(AddressResolver.instance.apply(address), "reply", failure.name()).inc();
   }
 
-  private static @NotNull Counter.Child bytes(@NotNull String address, @NotNull String type) {
-    return bytes.labels(AddressResolver.instance.apply(address), type);
-  }
-
   private static @NotNull String address(@Nullable Metric metric) {
     return metric == null ? "unknown" : metric.address;
   }
 
-  private static @NotNull Gauge.Child messages(@NotNull String address, boolean local, @NotNull String state) {
-    return messages.labels(local ? "local" : "remote", state, AddressResolver.instance.apply(address));
+  private @NotNull Counter.Child bytes(@NotNull String address, @NotNull String type) {
+    return bytes.labels(AddressResolver.instance.apply(address), type);
   }
 
+  private @NotNull Gauge.Child messages(@NotNull String address, boolean local, @NotNull String state) {
+    return messages.labels(local ? "local" : "remote", state, AddressResolver.instance.apply(address));
+  }
 
   public static final class Metric {
     private final @NotNull String address;
