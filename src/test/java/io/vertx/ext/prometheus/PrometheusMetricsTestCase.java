@@ -25,7 +25,7 @@ import java.util.function.UnaryOperator;
 abstract class PrometheusMetricsTestCase {
   protected static final int PORT = 8080;
 
-  private static final long TIMEOUT = TimeUnit.SECONDS.toMillis(5);
+  private static final long TIMEOUT = TimeUnit.SECONDS.toMillis(10);
 
   private final @NotNull Function<VertxPrometheusOptions, VertxPrometheusOptions> options;
   private final @NotNull CollectorRegistry registry;
@@ -78,7 +78,7 @@ abstract class PrometheusMetricsTestCase {
     return latch -> request(handler, latch)
         .exceptionHandler(event -> {
           // too fast, try again after delay
-          LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(1));
+          LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(5));
           request(handler, latch).end();
         })
         .end();
