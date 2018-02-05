@@ -1,19 +1,19 @@
 package io.vertx.ext.prometheus.metrics;
 
 import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.Histogram;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.WebSocket;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
-import io.vertx.ext.prometheus.metrics.counters.Stopwatch;
-import org.jetbrains.annotations.NotNull;
 import io.vertx.ext.prometheus.metrics.counters.EndpointMetrics;
 import io.vertx.ext.prometheus.metrics.counters.HTTPRequestMetrics;
 import io.vertx.ext.prometheus.metrics.counters.WebsocketGauge;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class HTTPClientPrometheusMetrics extends TCPPrometheusMetrics implements HttpClientMetrics<HTTPRequestMetrics.Metric, Void, Void, Void, Stopwatch> {
+public final class HTTPClientPrometheusMetrics extends TCPPrometheusMetrics implements HttpClientMetrics<HTTPRequestMetrics.Metric, Void, Void, Void, Histogram.Timer> {
   private static final @NotNull String NAME = "httpclient";
 
   private final @NotNull EndpointMetrics endpoints;
@@ -59,13 +59,13 @@ public final class HTTPClientPrometheusMetrics extends TCPPrometheusMetrics impl
   }
 
   @Override
-  public @NotNull Stopwatch enqueueRequest(@Nullable Void endpointMetric) {
+  public @NotNull Histogram.Timer enqueueRequest(@Nullable Void endpointMetric) {
     return endpoints.enqueue();
   }
 
   @Override
-  public void dequeueRequest(@Nullable Void endpointMetric, @NotNull Stopwatch stopwatch) {
-    endpoints.dequeue(stopwatch);
+  public void dequeueRequest(@Nullable Void endpointMetric, @NotNull Histogram.Timer timer) {
+    endpoints.dequeue(timer);
   }
 
   @Override

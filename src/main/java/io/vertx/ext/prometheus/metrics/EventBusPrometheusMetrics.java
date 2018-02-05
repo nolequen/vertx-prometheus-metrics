@@ -3,11 +3,9 @@ package io.vertx.ext.prometheus.metrics;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
-import io.prometheus.client.Summary;
+import io.prometheus.client.Histogram;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.spi.metrics.EventBusMetrics;
-import io.vertx.ext.prometheus.metrics.counters.Stopwatch;
-import io.vertx.ext.prometheus.metrics.counters.TimeCounter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,8 +32,7 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
       .labelNames("address", "type", "reason")
       .create();
 
-  private final @NotNull Summary time = new TimeCounter.SummaryBuilder()
-      .get("vertx_eventbus_messages_time_us", "Total messages processing time (us)")
+  private final @NotNull Histogram time = Histogram.build("vertx_eventbus_messages_time_seconds", "Total messages processing time in seconds")
       .labelNames("address")
       .create();
 
@@ -59,7 +56,7 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
     handlers.inc();
     final Optional<String> respondent = Optional.ofNullable(repliedAddress);
     respondent.ifPresent(r -> respondents.inc());
-    return new Metric(address, respondent);
+    return new Metric(address, respondent, time.labels(Address.Generated.apply(address)));
   }
 
   @Override
@@ -80,17 +77,17 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
     messages(address(metric), local, "pending").dec();
     messages(address(metric), local, "scheduled").dec();
     if (metric != null) {
-      metric.stopwatch.reset();
+      metric.resetTimer();
     }
   }
 
   @Override
   public void endHandleMessage(@Nullable Metric metric, @Nullable Throwable failure) {
     if (metric != null) {
-      time.labels(AddressResolver.instance.apply(metric.address)).observe(metric.stopwatch.stop());
+      metric.timer.observeDuration();
     }
     if (failure != null) {
-      failures.labels(AddressResolver.instance.apply(address(metric)), "request", failure.getClass().getSimpleName()).inc();
+      failures.labels(Address.Generated.apply(address(metric)), "request", failure.getClass().getSimpleName()).inc();
     }
   }
 
@@ -120,7 +117,7 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
 
   @Override
   public void replyFailure(@NotNull String address, @NotNull ReplyFailure failure) {
-    failures.labels(AddressResolver.instance.apply(address), "reply", failure.name()).inc();
+    failures.labels(Address.Generated.apply(address), "reply", failure.name()).inc();
   }
 
   private static @NotNull String address(@Nullable Metric metric) {
@@ -128,38 +125,51 @@ public final class EventBusPrometheusMetrics extends PrometheusMetrics implement
   }
 
   private @NotNull Counter.Child bytes(@NotNull String address, @NotNull String type) {
-    return bytes.labels(AddressResolver.instance.apply(address), type);
+    return bytes.labels(Address.Generated.apply(address), type);
   }
 
   private @NotNull Gauge.Child messages(@NotNull String address, boolean local, @NotNull String state) {
-    return messages.labels(local ? "local" : "remote", state, AddressResolver.instance.apply(address));
+    return messages.labels(local ? "local" : "remote", state, Address.Generated.apply(address));
+  }
+
+  private enum Address {
+    Generated(Pattern.compile("^\\d+$"), "vertx-generated-address");
+
+    private final @NotNull Pattern pattern;
+    private final @NotNull String replacement;
+
+    private Address(@NotNull Pattern pattern, @NotNull String replacement) {
+      this.pattern = pattern;
+      this.replacement = replacement;
+    }
+
+    public @NotNull String apply(@NotNull String address) {
+      if (pattern.matcher(address).matches()) {
+        return replacement;
+      }
+      if (address.split("-").length == 5) {
+        return replacement;
+      }
+      return address;
+    }
   }
 
   public static final class Metric {
     private final @NotNull String address;
     private final @NotNull Optional<String> respondent;
-    private final @NotNull Stopwatch stopwatch = new Stopwatch();
+    private final @NotNull Histogram.Child histogram;
+    private @NotNull Histogram.Timer timer;
 
-    public Metric(@NotNull String address, @NotNull Optional<String> respondent) {
+    public Metric(@NotNull String address, @NotNull Optional<String> respondent, @NotNull Histogram.Child histogram) {
       this.address = address;
       this.respondent = respondent;
+      this.histogram = histogram;
+      timer = histogram.startTimer();
     }
-  }
 
-  private static final class AddressResolver {
-    public static final @NotNull AddressResolver instance = new AddressResolver();
-
-    private static final @NotNull Pattern NUMBER_PATTERN = Pattern.compile("^\\d+$");
-    private static final @NotNull String GENERATED_ADDRESS = "vertx-generated-address";
-
-    public @NotNull String apply(@NotNull String address) {
-      if (NUMBER_PATTERN.matcher(address).matches()) {
-        return GENERATED_ADDRESS;
-      }
-      if (address.split("-").length == 5) {
-        return GENERATED_ADDRESS;
-      }
-      return address;
+    public @NotNull Histogram.Timer resetTimer() {
+      timer = histogram.startTimer();
+      return timer;
     }
   }
 }

@@ -1,22 +1,19 @@
 package io.vertx.ext.prometheus.metrics;
 
 import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
-import io.prometheus.client.Summary;
+import io.prometheus.client.Histogram;
 import io.vertx.core.spi.metrics.PoolMetrics;
-import io.vertx.ext.prometheus.metrics.counters.Stopwatch;
-import io.vertx.ext.prometheus.metrics.counters.TimeCounter;
 import org.jetbrains.annotations.NotNull;
 
-public final class PoolPrometheusMetrics extends PrometheusMetrics implements PoolMetrics<Stopwatch> {
+public final class PoolPrometheusMetrics extends PrometheusMetrics implements PoolMetrics<Histogram.Timer> {
   private final @NotNull TaskMetrics tasks;
   private final @NotNull TimeMetrics time;
 
   public PoolPrometheusMetrics(@NotNull CollectorRegistry registry, @NotNull String type, @NotNull String name, int maxSize) {
     super(registry);
     register(TaskMetrics.gauge);
-    register(TimeMetrics.summary);
+    register(TimeMetrics.histogram);
     tasks = new TaskMetrics(type, name);
     time = new TimeMetrics(type, name);
 
@@ -24,27 +21,27 @@ public final class PoolPrometheusMetrics extends PrometheusMetrics implements Po
   }
 
   @Override
-  public @NotNull Stopwatch submitted() {
+  public @NotNull Histogram.Timer submitted() {
     tasks.queued.inc();
-    return new Stopwatch();
+    return time.delay.startTimer();
   }
 
   @Override
-  public void rejected(@NotNull Stopwatch submittedStopwatch) {
+  public void rejected(@NotNull Histogram.Timer submittedTimer) {
     tasks.queued.dec();
   }
 
   @Override
-  public @NotNull Stopwatch begin(@NotNull Stopwatch submittedStopwatch) {
+  public @NotNull Histogram.Timer begin(@NotNull Histogram.Timer submittedTimer) {
     tasks.queued.dec();
     tasks.used.inc();
-    time.delay.observe(submittedStopwatch.stop());
-    return submittedStopwatch;
+    submittedTimer.observeDuration();
+    return time.process.startTimer();
   }
 
   @Override
-  public void end(@NotNull Stopwatch beginStopwatch, boolean succeeded) {
-    time.process.observe(beginStopwatch.stop());
+  public void end(@NotNull Histogram.Timer beginTimer, boolean succeeded) {
+    beginTimer.observeDuration();
     tasks.used.dec();
   }
 
@@ -62,17 +59,16 @@ public final class PoolPrometheusMetrics extends PrometheusMetrics implements Po
   }
 
   private static final class TimeMetrics {
-    private static final @NotNull Summary summary = new TimeCounter.SummaryBuilder()
-        .get("vertx_pool_time_us", "Pool time metrics (us)")
+    private static final @NotNull Histogram histogram = Histogram.build("vertx_pool_time_seconds", "Pool time metrics in seconds")
         .labelNames("type", "name", "state")
         .create();
 
-    private final @NotNull Summary.Child delay;
-    private final @NotNull Summary.Child process;
+    private final @NotNull Histogram.Child delay;
+    private final @NotNull Histogram.Child process;
 
     public TimeMetrics(@NotNull String type, @NotNull String name) {
-      delay = summary.labels(type, name, "delay");
-      process = summary.labels(type, name, "process");
+      delay = histogram.labels(type, name, "delay");
+      process = histogram.labels(type, name, "process");
     }
   }
 }

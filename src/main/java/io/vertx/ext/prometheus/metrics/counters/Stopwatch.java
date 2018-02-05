@@ -1,21 +1,26 @@
 package io.vertx.ext.prometheus.metrics.counters;
 
-import java.util.concurrent.TimeUnit;
+import io.prometheus.client.Histogram;
+import io.vertx.ext.prometheus.metrics.PrometheusMetrics;
+import org.jetbrains.annotations.NotNull;
 
 public final class Stopwatch {
-  private long startTime;
+  private final @NotNull Histogram summary;
+  private final @NotNull Histogram.Child time;
 
-  public Stopwatch() {
-    reset();
+  public Stopwatch(@NotNull String name, @NotNull String localAddress) {
+    summary = Histogram.build("vertx_" + name + "_time_seconds", "Processing time in seconds")
+        .labelNames("local_address")
+        .create();
+    time = summary.labels(localAddress);
   }
 
-  public long stop() {
-    final long elapsed = TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startTime);
-    reset();
-    return elapsed;
+  public @NotNull Stopwatch register(@NotNull PrometheusMetrics metrics) {
+    metrics.register(summary);
+    return this;
   }
 
-  public void reset() {
-    startTime = System.nanoTime();
+  public @NotNull Histogram.Timer start() {
+    return time.startTimer();
   }
 }
