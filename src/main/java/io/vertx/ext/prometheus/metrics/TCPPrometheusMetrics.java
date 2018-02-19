@@ -6,6 +6,8 @@ import io.vertx.core.spi.metrics.TCPMetrics;
 import io.vertx.ext.prometheus.metrics.counters.BytesCounter;
 import io.vertx.ext.prometheus.metrics.counters.ConnectionGauge;
 import io.vertx.ext.prometheus.metrics.counters.ErrorCounter;
+import io.vertx.ext.prometheus.metrics.factories.CounterFactory;
+import io.vertx.ext.prometheus.metrics.factories.GaugeFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,11 +16,11 @@ public abstract class TCPPrometheusMetrics extends PrometheusMetrics implements 
   private final @NotNull BytesCounter bytes;
   private final @NotNull ErrorCounter errors;
 
-  protected TCPPrometheusMetrics(@NotNull CollectorRegistry registry, @NotNull String name, @NotNull String localAddress) {
+  protected TCPPrometheusMetrics(@NotNull CollectorRegistry registry, @NotNull String name, @NotNull String localAddress, @NotNull GaugeFactory gauges, @NotNull CounterFactory counters) {
     super(registry);
-    connections = new ConnectionGauge(name, localAddress).register(this);
-    errors = new ErrorCounter(name, localAddress).register(this);
-    bytes = new BytesCounter(name, localAddress).register(this);
+    connections = new ConnectionGauge(name, localAddress, gauges);
+    errors = new ErrorCounter(name, localAddress, counters);
+    bytes = new BytesCounter(name, localAddress, counters);
   }
 
   @Override

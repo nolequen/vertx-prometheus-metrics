@@ -18,6 +18,9 @@ import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.*;
 import io.vertx.ext.prometheus.metrics.*;
+import io.vertx.ext.prometheus.metrics.factories.CounterFactory;
+import io.vertx.ext.prometheus.metrics.factories.GaugeFactory;
+import io.vertx.ext.prometheus.metrics.factories.HistogramFactory;
 import io.vertx.ext.prometheus.server.MetricsServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +32,9 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
   private final @NotNull VertxPrometheusOptions options;
   private final @NotNull VerticleMetrics verticleMetrics;
   private final @NotNull TimerMetrics timerMetrics;
+  private final @NotNull GaugeFactory gauges;
+  private final @NotNull CounterFactory counters;
+  private final @NotNull HistogramFactory histograms;
 
   private @Nullable Closeable server;
 
@@ -37,6 +43,9 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
     this.options = options;
     this.verticleMetrics = options.isEnabled(Verticles) ? new VerticlePrometheusMetrics(options.getRegistry()) : new VerticleDummyMetrics();
     this.timerMetrics = options.isEnabled(Timers) ? new TimerPrometheusMetrics(options.getRegistry()) : new TimerDummyMetrics();
+    this.gauges = new GaugeFactory(options.getRegistry());
+    this.counters = new CounterFactory(options.getRegistry());
+    this.histograms = new HistogramFactory(options.getRegistry());
   }
 
   @Override
@@ -79,35 +88,35 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
   @Override
   public @NotNull HttpServerMetrics<?, ?, ?> createMetrics(@NotNull HttpServer httpServer, @NotNull SocketAddress localAddress, @NotNull HttpServerOptions httpServerOptions) {
     return options.isEnabled(HTTPServer)
-        ? new HTTPServerPrometheusMetrics(options.getRegistry(), localAddress)
+        ? new HTTPServerPrometheusMetrics(options.getRegistry(), localAddress, gauges, counters, histograms)
         : super.createMetrics(httpServer, localAddress, httpServerOptions);
   }
 
   @Override
   public @NotNull HttpClientMetrics<?, ?, ?, ?, ?> createMetrics(@NotNull HttpClient client, @NotNull HttpClientOptions httpClientOptions) {
     return options.isEnabled(HTTPClient)
-        ? new HTTPClientPrometheusMetrics(options.getRegistry(), getLocalAddress(httpClientOptions.getLocalAddress()))
+        ? new HTTPClientPrometheusMetrics(options.getRegistry(), getLocalAddress(httpClientOptions.getLocalAddress()), gauges, counters, histograms)
         : super.createMetrics(client, httpClientOptions);
   }
 
   @Override
   public @NotNull TCPMetrics<?> createMetrics(@NotNull SocketAddress localAddress, @NotNull NetServerOptions netServerOptions) {
     return options.isEnabled(NetServer)
-        ? new NetServerPrometheusMetrics(options.getRegistry(), localAddress)
+        ? new NetServerPrometheusMetrics(options.getRegistry(), localAddress, gauges, counters)
         : super.createMetrics(localAddress, netServerOptions);
   }
 
   @Override
   public @NotNull TCPMetrics<?> createMetrics(@NotNull NetClientOptions netClientOptions) {
     return options.isEnabled(NetClient)
-        ? new NetClientPrometheusMetrics(options.getRegistry(), getLocalAddress(netClientOptions.getLocalAddress()))
+        ? new NetClientPrometheusMetrics(options.getRegistry(), getLocalAddress(netClientOptions.getLocalAddress()), gauges, counters)
         : super.createMetrics(netClientOptions);
   }
 
   @Override
   public @NotNull DatagramSocketMetrics createMetrics(@NotNull DatagramSocket socket, @NotNull DatagramSocketOptions datagramSocketOptions) {
     return options.isEnabled(DatagramSocket)
-        ? new DatagramSocketPrometheusMetrics(options.getRegistry())
+        ? new DatagramSocketPrometheusMetrics(options.getRegistry(), counters)
         : super.createMetrics(socket, datagramSocketOptions);
   }
 
@@ -133,6 +142,10 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
     if (server != null) {
       server.close(event -> { /* do nothing */ });
     }
+
+    gauges.close();
+    counters.close();
+    histograms.close();
   }
 
   private static @NotNull String getLocalAddress(@Nullable String address) {

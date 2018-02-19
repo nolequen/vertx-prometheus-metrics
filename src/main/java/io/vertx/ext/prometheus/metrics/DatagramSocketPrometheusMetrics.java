@@ -6,6 +6,7 @@ import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.core.spi.metrics.DatagramSocketMetrics;
 import io.vertx.ext.prometheus.metrics.counters.BytesCounter;
 import io.vertx.ext.prometheus.metrics.counters.ErrorCounter;
+import io.vertx.ext.prometheus.metrics.factories.CounterFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,11 +20,11 @@ public final class DatagramSocketPrometheusMetrics extends PrometheusMetrics imp
 
   private volatile @Nullable SocketAddress namedLocalAddress;
 
-  public DatagramSocketPrometheusMetrics(@NotNull CollectorRegistry registry) {
+  public DatagramSocketPrometheusMetrics(@NotNull CollectorRegistry registry, @NotNull CounterFactory counters) {
     super(registry);
     final Supplier<String> localAddress = () -> String.valueOf(namedLocalAddress);
-    bytes = new BytesCounter(NAME, localAddress).register(this);
-    errors = new ErrorCounter(NAME, localAddress).register(this);
+    bytes = new BytesCounter(NAME, localAddress, counters);
+    errors = new ErrorCounter(NAME, localAddress, counters);
   }
 
   @Override

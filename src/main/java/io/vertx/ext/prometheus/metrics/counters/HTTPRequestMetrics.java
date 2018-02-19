@@ -4,7 +4,9 @@ import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.Histogram;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.ext.prometheus.metrics.PrometheusMetrics;
+import io.vertx.ext.prometheus.metrics.factories.CounterFactory;
+import io.vertx.ext.prometheus.metrics.factories.GaugeFactory;
+import io.vertx.ext.prometheus.metrics.factories.HistogramFactory;
 import org.jetbrains.annotations.NotNull;
 
 public final class HTTPRequestMetrics {
@@ -13,20 +15,11 @@ public final class HTTPRequestMetrics {
   private final @NotNull Stopwatch proocessTime;
   private final @NotNull String localAddress;
 
-  public HTTPRequestMetrics(@NotNull String name, @NotNull String localAddress) {
+  public HTTPRequestMetrics(@NotNull String name, @NotNull String localAddress, @NotNull GaugeFactory gauges, @NotNull CounterFactory counters, @NotNull HistogramFactory histograms) {
     this.localAddress = localAddress;
-    requests = Gauge.build("vertx_" + name + "_requests", "HTTP requests number")
-        .labelNames("local_address", "method", "path", "state").create();
-    responses = Counter.build("vertx_" + name + "_responses", "HTTP responses number")
-        .labelNames("local_address", "code").create();
-    proocessTime = new Stopwatch(name + "_requests", localAddress);
-  }
-
-  public @NotNull HTTPRequestMetrics register(@NotNull PrometheusMetrics metrics) {
-    metrics.register(requests);
-    metrics.register(responses);
-    proocessTime.register(metrics);
-    return this;
+    requests = gauges.httpRequests(name);
+    responses = counters.httpResponses(name);
+    proocessTime = new Stopwatch(name + "_requests", localAddress, histograms);
   }
 
   public @NotNull Metric begin(@NotNull HttpMethod method, @NotNull String path) {
