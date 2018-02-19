@@ -32,9 +32,9 @@ public class GaugeFactory {
    * @return A gauge for http requests, identified by the given name. Gauges with the same name are shared.
    */
   public Gauge httpRequests(String name) {
-    return gauges.computeIfAbsent("vertx_" + name + "_requests", key -> Gauge.build(key, "HTTP requests number")
+    return gauges.computeIfAbsent("vertx_" + name + "_requests", key -> register(Gauge.build(key, "HTTP requests number")
         .labelNames("local_address", "method", "path", "state")
-        .create());
+        .create()));
   }
 
   /**
@@ -42,8 +42,8 @@ public class GaugeFactory {
    * @return A gauge for websockets, identified by the given name. Gauges with the same name are shared.
    */
   public Gauge websockets(String name) {
-    return gauges.computeIfAbsent("vertx_" + name + "_websockets", key -> Gauge.build(key, "Websockets number")
-        .labelNames("local_address").create());
+    return gauges.computeIfAbsent("vertx_" + name + "_websockets", key -> register(Gauge.build(key, "Websockets number")
+        .labelNames("local_address").create()));
   }
 
   /**
@@ -51,8 +51,8 @@ public class GaugeFactory {
    * @return A gauge for connections, identified by the given name. Gauges with the same name are shared.
    */
   public Gauge connections(String name) {
-    return gauges.computeIfAbsent("vertx_" + name + "_connections", key -> Gauge.build(key, "Active connections number")
-        .labelNames("local_address").create());
+    return gauges.computeIfAbsent("vertx_" + name + "_connections", key -> register(Gauge.build(key, "Active connections number")
+        .labelNames("local_address").create()));
   }
 
   /**
@@ -60,7 +60,12 @@ public class GaugeFactory {
    * @return A gauge for endpoints, identified by the given name. Gauges with the same name are shared.
    */
   public Gauge endpoints(String name) {
-    return gauges.computeIfAbsent("vertx_" + name + "_endpoints", key -> Gauge.build(key, "Endpoints number")
-        .labelNames("local_address", "state").create());
+    return gauges.computeIfAbsent("vertx_" + name + "_endpoints", key -> register(Gauge.build(key, "Endpoints number")
+        .labelNames("local_address", "state").create()));
+  }
+
+  private Gauge register(Gauge gauge) {
+    registry.register(gauge);
+    return gauge;
   }
 }

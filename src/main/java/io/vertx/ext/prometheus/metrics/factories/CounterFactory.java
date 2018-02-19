@@ -32,8 +32,8 @@ public class CounterFactory {
    * @return A counter of bytes for the given name. Counters with the same name are shared.
    */
   public Counter bytes(String name) {
-    return counters.computeIfAbsent("vertx_" + name + "_bytes", key -> Counter.build(key, "Read/written bytes")
-        .labelNames("local_address", "type").create());
+    return counters.computeIfAbsent("vertx_" + name + "_bytes", key -> register(Counter.build(key, "Read/written bytes")
+        .labelNames("local_address", "type").create()));
   }
 
   /**
@@ -41,8 +41,8 @@ public class CounterFactory {
    * @return A counter for errors, identified by the given name. Counters with the same name are shared.
    */
   public Counter errors(String name) {
-    return counters.computeIfAbsent("vertx_" + name + "_errors", key -> Counter.build(key, "Errors number")
-        .labelNames("local_address", "class").create());
+    return counters.computeIfAbsent("vertx_" + name + "_errors", key -> register(Counter.build(key, "Errors number")
+        .labelNames("local_address", "class").create()));
   }
 
   /**
@@ -50,7 +50,12 @@ public class CounterFactory {
    * @return A counter of http responses, identified by the given name. Counters with the same name are shared.
    */
   public Counter httpResponses(String name) {
-    return counters.computeIfAbsent("vertx_" + name + "_responses", key -> Counter.build(key, "HTTP responses number")
-        .labelNames("local_address", "code").create());
+    return counters.computeIfAbsent("vertx_" + name + "_responses", key -> register(Counter.build(key, "HTTP responses number")
+        .labelNames("local_address", "code").create()));
+  }
+
+  private Counter register(Counter counter) {
+    registry.register(counter);
+    return counter;
   }
 }

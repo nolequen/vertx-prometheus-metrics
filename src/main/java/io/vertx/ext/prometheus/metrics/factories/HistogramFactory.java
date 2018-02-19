@@ -31,8 +31,13 @@ public class HistogramFactory {
    * @return A histogram for http requests, identified by the given name. Histograms with the same name are shared.
    */
   public Histogram timeSeconds(String name) {
-    return histograms.computeIfAbsent("vertx_" + name + "_time_seconds", key -> Histogram.build(key, "Processing time in seconds")
+    return histograms.computeIfAbsent("vertx_" + name + "_time_seconds", key -> register(Histogram.build(key, "Processing time in seconds")
         .labelNames("local_address")
-        .create());
+        .create()));
+  }
+
+  private Histogram register(Histogram histogram) {
+    registry.register(histogram);
+    return histogram;
   }
 }
