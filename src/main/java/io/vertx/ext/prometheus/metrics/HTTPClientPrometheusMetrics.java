@@ -10,6 +10,9 @@ import io.vertx.core.spi.metrics.HttpClientMetrics;
 import io.vertx.ext.prometheus.metrics.counters.EndpointMetrics;
 import io.vertx.ext.prometheus.metrics.counters.HTTPRequestMetrics;
 import io.vertx.ext.prometheus.metrics.counters.WebsocketGauge;
+import io.vertx.ext.prometheus.metrics.factories.CounterFactory;
+import io.vertx.ext.prometheus.metrics.factories.GaugeFactory;
+import io.vertx.ext.prometheus.metrics.factories.HistogramFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,11 +23,11 @@ public final class HTTPClientPrometheusMetrics extends TCPPrometheusMetrics impl
   private final @NotNull WebsocketGauge websockets;
   private final @NotNull HTTPRequestMetrics requests;
 
-  public HTTPClientPrometheusMetrics(@NotNull CollectorRegistry registry, @NotNull String localAddress) {
-    super(registry, NAME, localAddress);
-    requests = new HTTPRequestMetrics(NAME, localAddress).register(this);
-    endpoints = new EndpointMetrics(NAME, localAddress).register(this);
-    websockets = new WebsocketGauge(NAME, localAddress).register(this);
+  public HTTPClientPrometheusMetrics(@NotNull CollectorRegistry registry, @NotNull String localAddress, @NotNull GaugeFactory gauges, @NotNull CounterFactory counters, @NotNull HistogramFactory histograms) {
+    super(registry, NAME, localAddress, gauges, counters);
+    requests = new HTTPRequestMetrics(NAME, localAddress, gauges, counters, histograms);
+    endpoints = new EndpointMetrics(NAME, localAddress, gauges, histograms);
+    websockets = new WebsocketGauge(NAME, localAddress, gauges);
   }
 
   @Override

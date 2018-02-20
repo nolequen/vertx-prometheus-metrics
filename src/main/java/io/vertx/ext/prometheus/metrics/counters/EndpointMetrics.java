@@ -2,7 +2,8 @@ package io.vertx.ext.prometheus.metrics.counters;
 
 import io.prometheus.client.Gauge;
 import io.prometheus.client.Histogram;
-import io.vertx.ext.prometheus.metrics.PrometheusMetrics;
+import io.vertx.ext.prometheus.metrics.factories.GaugeFactory;
+import io.vertx.ext.prometheus.metrics.factories.HistogramFactory;
 import org.jetbrains.annotations.NotNull;
 
 public final class EndpointMetrics {
@@ -10,17 +11,10 @@ public final class EndpointMetrics {
   private final @NotNull Stopwatch queueTime;
   private final @NotNull String localAddress;
 
-  public EndpointMetrics(@NotNull String name, @NotNull String localAddress) {
+  public EndpointMetrics(@NotNull String name, @NotNull String localAddress, @NotNull GaugeFactory gauges, @NotNull HistogramFactory histograms) {
     this.localAddress = localAddress;
-    gauge = Gauge.build("vertx_" + name + "_endpoints", "Endpoints number")
-        .labelNames("local_address", "state").create();
-    queueTime = new Stopwatch(name + "_endpoints_queue", localAddress);
-  }
-
-  public @NotNull EndpointMetrics register(@NotNull PrometheusMetrics metrics) {
-    metrics.register(gauge);
-    queueTime.register(metrics);
-    return this;
+    gauge = gauges.endpoints(name);
+    queueTime = new Stopwatch(name + "_endpoints_queue", localAddress, histograms);
   }
 
   public void increment() {

@@ -23,7 +23,7 @@ You can find latest release on Maven Central.
 
 * Gradle:
 ```groovy
-compile group: 'su.nlq', name: 'vertx-prometheus-metrics', version: '3.5.0'
+compile group: 'su.nlq', name: 'vertx-prometheus-metrics', version: '3.5.1'
 ```
 
 Now you can set and enable Vert.x metrics:
@@ -42,6 +42,7 @@ final Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
 | **0.15.x** | 3.5.0      | 0.1.0      |
 Version adjust
 | **3.5.0**  | 3.5.0      | 0.1.0      |
+| **3.5.1**  | 3.5.1      | 0.2.0      |
 
 ## Options
 

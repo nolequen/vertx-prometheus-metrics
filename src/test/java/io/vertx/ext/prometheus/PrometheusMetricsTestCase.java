@@ -68,10 +68,14 @@ abstract class PrometheusMetricsTestCase {
     }));
   }
 
-  protected final void await(@NotNull Consumer<Async> task) {
+  protected final void await(long timeout, TimeUnit timeoutUnit, @NotNull Consumer<Async> task) {
     final Async latch = context.async();
     task.accept(latch);
-    latch.await(TIMEOUT);
+    latch.await(timeoutUnit.toMillis(timeout));
+  }
+
+  protected final void await(@NotNull Consumer<Async> task) {
+    await(TIMEOUT, TimeUnit.MILLISECONDS, task);
   }
 
   protected final @NotNull Consumer<Async> response(@NotNull Handler<Buffer> handler) {
