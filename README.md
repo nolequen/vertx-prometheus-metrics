@@ -17,7 +17,7 @@ You can find latest release on Maven Central.
 <dependency>
   <groupId>su.nlq</groupId>
   <artifactId>vertx-prometheus-metrics</artifactId>
-  <version>3.5.0</version>
+  <version>3.5.1</version>
 </dependency>
 ```
 
