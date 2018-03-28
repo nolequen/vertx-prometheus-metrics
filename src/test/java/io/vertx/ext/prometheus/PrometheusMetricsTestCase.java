@@ -50,6 +50,7 @@ abstract class PrometheusMetricsTestCase {
     this.registry = registry;
     this.options = options.compose(o -> o
         .setEnabled(true)
+        .enableEmbeddedServer(true)
         .setPort(PORT)
         .setRegistry(registry));
   }
