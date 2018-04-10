@@ -25,7 +25,7 @@ public final class VertxPrometheusOptions extends MetricsOptions {
   private @NotNull ExpositionFormat format = ExpositionFormat.Text;
   private @NotNull String host = DEFAULT_HOST;
   private int port = DEFAULT_PORT;
-  private boolean embeddedServerEnabled = true;
+  private boolean embeddedServerEnabled = false;
 
   public VertxPrometheusOptions() {
     super();
@@ -158,12 +158,12 @@ public final class VertxPrometheusOptions extends MetricsOptions {
   }
 
   /**
-   * Enable or disable embedded Prometheus server. Default is {@code true}.
+   * Enable or disable embedded Prometheus server. Default is {@code false}.
    *
-   * @param enable or disable the embedded server
+   * @param enabled or disable the embedded server
    * @return a reference to this, so the API can be used fluently
    */
-  public @NotNull VertxPrometheusOptions enableEmbeddedServer(boolean enable) {
+  public @NotNull VertxPrometheusOptions setEmbeddedServerEnabled(boolean enabled) {
     this.embeddedServerEnabled = enable;
     return this;
   }
