@@ -15,6 +15,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
@@ -25,7 +26,7 @@ import java.util.function.UnaryOperator;
 abstract class PrometheusMetricsTestCase {
   protected static final int PORT = 8080;
 
-  private static final long TIMEOUT = TimeUnit.SECONDS.toMillis(10);
+  private static final @NotNull Duration DEFAULT_TIMEOUT = Duration.ofSeconds(10);
 
   private final @NotNull Function<VertxPrometheusOptions, VertxPrometheusOptions> options;
   private final @NotNull CollectorRegistry registry;
@@ -50,7 +51,7 @@ abstract class PrometheusMetricsTestCase {
     this.registry = registry;
     this.options = options.compose(o -> o
         .setEnabled(true)
-        .enableEmbeddedServer(true)
+        .setEmbeddedServerEnabled(true)
         .setPort(PORT)
         .setRegistry(registry));
   }
@@ -69,14 +70,14 @@ abstract class PrometheusMetricsTestCase {
     }));
   }
 
-  protected final void await(long timeout, TimeUnit timeoutUnit, @NotNull Consumer<Async> task) {
+  protected final void await(@NotNull Duration timeout, @NotNull Consumer<Async> task) {
     final Async latch = context.async();
     task.accept(latch);
-    latch.await(timeoutUnit.toMillis(timeout));
+    latch.await(timeout.toMillis());
   }
 
   protected final void await(@NotNull Consumer<Async> task) {
-    await(TIMEOUT, TimeUnit.MILLISECONDS, task);
+    await(DEFAULT_TIMEOUT, task);
   }
 
   protected final @NotNull Consumer<Async> response(@NotNull Handler<Buffer> handler) {

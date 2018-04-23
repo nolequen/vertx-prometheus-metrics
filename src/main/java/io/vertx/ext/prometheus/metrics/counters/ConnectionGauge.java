@@ -8,8 +8,7 @@ public final class ConnectionGauge {
   private final @NotNull Gauge.Child connections;
 
   public ConnectionGauge(@NotNull String name, @NotNull String localAddress, @NotNull GaugeFactory gauges) {
-    Gauge gauge = gauges.connections(name);
-    connections = gauge.labels(localAddress);
+    connections = gauges.connections(name).labels(localAddress);
   }
 
   public void connected() {

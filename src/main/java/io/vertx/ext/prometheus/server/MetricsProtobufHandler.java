@@ -20,22 +20,25 @@ public final class MetricsProtobufHandler implements Handler<RoutingContext> {
 
   @Override
   public void handle(@NotNull RoutingContext context) {
-    context.vertx().<Buffer>executeBlocking(future -> {
-      try (final ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-        new ProtobufFormatter(registry.metricFamilySamples()).write(output);
-        future.complete(Buffer.buffer(output.toByteArray()));
-      } catch (IOException e) {
-        future.fail(e);
-      }
-    }, false, result -> {
-      if (result.succeeded()) {
-        context.response()
-            .setStatusCode(HttpResponseStatus.OK.code())
-            .putHeader("Content-Type", ProtobufFormatter.CONTENT_TYPE)
-            .end(result.result());
-      } else {
-        context.fail(result.cause());
-      }
-    });
+    context.vertx().<Buffer>executeBlocking(
+        future -> {
+          try (final ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            new ProtobufFormatter(registry.metricFamilySamples()).write(output);
+            future.complete(Buffer.buffer(output.toByteArray()));
+          } catch (IOException e) {
+            future.fail(e);
+          }
+        },
+        false,
+        result -> {
+          if (result.succeeded()) {
+            context.response()
+                .setStatusCode(HttpResponseStatus.OK.code())
+                .putHeader("Content-Type", ProtobufFormatter.CONTENT_TYPE)
+                .end(result.result());
+          } else {
+            context.fail(result.cause());
+          }
+        });
   }
 }

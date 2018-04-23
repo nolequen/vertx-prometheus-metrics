@@ -164,7 +164,7 @@ public final class VertxPrometheusOptions extends MetricsOptions {
    * @return a reference to this, so the API can be used fluently
    */
   public @NotNull VertxPrometheusOptions setEmbeddedServerEnabled(boolean enabled) {
-    this.embeddedServerEnabled = enable;
+    this.embeddedServerEnabled = enabled;
     return this;
   }
 

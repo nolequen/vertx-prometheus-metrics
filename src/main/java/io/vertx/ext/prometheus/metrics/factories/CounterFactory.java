@@ -2,6 +2,7 @@ package io.vertx.ext.prometheus.metrics.factories;
 
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,11 +13,11 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author jansorg
  */
-public class CounterFactory {
-  private final CollectorRegistry registry;
-  private final Map<String, Counter> counters = new ConcurrentHashMap<>();
+public final class CounterFactory {
+  private final @NotNull CollectorRegistry registry;
+  private final @NotNull Map<String, Counter> counters = new ConcurrentHashMap<>();
 
-  public CounterFactory(CollectorRegistry registry) {
+  public CounterFactory(@NotNull CollectorRegistry registry) {
     this.registry = registry;
   }
 
@@ -28,33 +29,39 @@ public class CounterFactory {
   }
 
   /**
+   * Bytes counter.
+   *
    * @param name The name of the counter, without prefix and suffix.
    * @return A counter of bytes for the given name. Counters with the same name are shared.
    */
-  public Counter bytes(String name) {
+  public @NotNull Counter bytes(@NotNull String name) {
     return counters.computeIfAbsent("vertx_" + name + "_bytes", key -> register(Counter.build(key, "Read/written bytes")
         .labelNames("local_address", "type").create()));
   }
 
   /**
+   * Errors counter.
+   *
    * @param name The name of the counter, without prefix and suffix.
    * @return A counter for errors, identified by the given name. Counters with the same name are shared.
    */
-  public Counter errors(String name) {
+  public @NotNull Counter errors(@NotNull String name) {
     return counters.computeIfAbsent("vertx_" + name + "_errors", key -> register(Counter.build(key, "Errors number")
         .labelNames("local_address", "class").create()));
   }
 
   /**
+   * HTTP responses counter.
+   *
    * @param name The name of the counter, without prefix and suffix.
    * @return A counter of http responses, identified by the given name. Counters with the same name are shared.
    */
-  public Counter httpResponses(String name) {
+  public @NotNull Counter httpResponses(@NotNull String name) {
     return counters.computeIfAbsent("vertx_" + name + "_responses", key -> register(Counter.build(key, "HTTP responses number")
         .labelNames("local_address", "code").create()));
   }
 
-  private Counter register(Counter counter) {
+  private @NotNull Counter register(@NotNull Counter counter) {
     registry.register(counter);
     return counter;
   }

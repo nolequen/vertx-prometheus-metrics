@@ -21,6 +21,5 @@ public enum ExpositionFormat {
     }
   };
 
-  @NotNull
-  abstract Handler<RoutingContext> handler(@NotNull CollectorRegistry registry);
+  abstract @NotNull Handler<RoutingContext> handler(@NotNull CollectorRegistry registry);
 }

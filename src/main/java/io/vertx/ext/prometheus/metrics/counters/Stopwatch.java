@@ -8,8 +8,7 @@ public final class Stopwatch {
   private final @NotNull Histogram.Child time;
 
   public Stopwatch(@NotNull String name, @NotNull String localAddress, @NotNull HistogramFactory histograms) {
-    Histogram summary = histograms.timeSeconds(name);
-    time = summary.labels(localAddress);
+    time = histograms.timeSeconds(name).labels(localAddress);
   }
 
   public @NotNull Histogram.Timer start() {

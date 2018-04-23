@@ -8,8 +8,7 @@ public final class WebsocketGauge {
   private final @NotNull Gauge.Child websockets;
 
   public WebsocketGauge(@NotNull String name, @NotNull String localAddress, @NotNull GaugeFactory gauges) {
-    Gauge gauge = gauges.websockets(name);
-    websockets = gauge.labels(localAddress);
+    websockets = gauges.websockets(name).labels(localAddress);
   }
 
   public void increment() {
