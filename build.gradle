@@ -1,6 +1,11 @@
 group 'su.nlq'
 version '3.5.1'
 
+ext {
+  vertxVersion = '3.5.2'
+  prometheusVersion = '0.4.0'
+}
+
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'signing'
@@ -13,19 +18,19 @@ repositories {
 }
 
 dependencies {
-  compile group: 'org.jetbrains', name: 'annotations', version: '16.0.1'
+  compile group: 'org.jetbrains', name: 'annotations', version: '16.0.2'
 
-  compile group: 'io.vertx', name: 'vertx-core', version: '3.5.1'
-  compile group: 'io.vertx', name: 'vertx-web', version: '3.5.1'
+  compile group: 'io.vertx', name: 'vertx-core', version: vertxVersion
+  compile group: 'io.vertx', name: 'vertx-web', version: vertxVersion
                                                                                         
-  compile group: 'io.prometheus', name: 'simpleclient', version: '0.3.0'
-  compile group: 'io.prometheus', name: 'simpleclient_servlet', version: '0.3.0'
-  compile group: 'io.prometheus', name: 'simpleclient_common', version: '0.3.0'
+  compile group: 'io.prometheus', name: 'simpleclient', version: prometheusVersion
+  compile group: 'io.prometheus', name: 'simpleclient_servlet', version: prometheusVersion
+  compile group: 'io.prometheus', name: 'simpleclient_common', version: prometheusVersion
 
-  compile group: 'su.nlq', name: 'prometheus-protobuf-servlet', version: '0.3.0'
+  compile group: 'su.nlq', name: 'prometheus-protobuf-servlet', version: prometheusVersion
 
   testCompile group: 'junit', name: 'junit', version: '4.12'
-  testCompile group: 'io.vertx', name: 'vertx-unit', version: '3.5.1'
+  testCompile group: 'io.vertx', name: 'vertx-unit', version: vertxVersion
 }
 
 jacocoTestReport {
