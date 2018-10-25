@@ -2,7 +2,6 @@
 
 [![Build Status](https://img.shields.io/travis/nolequen/vertx-prometheus-metrics.svg?branch=master)](https://travis-ci.org/nolequen/vertx-prometheus-metrics)
 [![Maven Central](https://img.shields.io/maven-central/v/su.nlq/vertx-prometheus-metrics.svg)](https://maven-badges.herokuapp.com/maven-central/su.nlq/vertx-prometheus-metrics)
-[![Dependency Status](https://www.versioneye.com/user/projects/596d0ea90fb24f00558fe198/badge.svg)](https://www.versioneye.com/user/projects/596d0ea90fb24f00558fe198)
 [![Codecov](https://codecov.io/gh/nolequen/vertx-prometheus-metrics/branch/master/graph/badge.svg)](https://codecov.io/gh/nolequen/vertx-prometheus-metrics)
 [![Codebeat](https://codebeat.co/badges/4c9127d1-d016-46e9-9348-c8c723266ea2)](https://codebeat.co/projects/github-com-nolequen-vertx-prometheus-metrics-master)
 
