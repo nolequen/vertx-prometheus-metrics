@@ -1,9 +1,9 @@
 group 'su.nlq'
-version '3.5.2'
+version '3.5.4'
 
 ext {
-  vertxVersion = '3.5.2'
-  prometheusVersion = '0.4.0'
+  vertxVersion = '3.5.4'
+  prometheusVersion = '0.5.0'
 }
 
 apply plugin: 'java'
@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-  compile group: 'org.jetbrains', name: 'annotations', version: '16.0.2'
+  compile group: 'org.jetbrains', name: 'annotations', version: '16.0.3'
 
   compile group: 'io.vertx', name: 'vertx-core', version: vertxVersion
   compile group: 'io.vertx', name: 'vertx-web', version: vertxVersion
