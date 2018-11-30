@@ -10,6 +10,10 @@ import java.net.InetSocketAddress;
 
 public final class ExternalServerTest extends PrometheusMetricsTestCase {
 
+  public ExternalServerTest() {
+    super(o -> o.setEmbeddedServerEnabled(false));
+  }
+
   @Test
   public void test() {
     MetricsServer
