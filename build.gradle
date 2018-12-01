@@ -1,5 +1,5 @@
 group 'su.nlq'
-version '3.5.4'
+version '3.6.0'
 
 ext {
   vertxVersion = '3.6.0'
