@@ -17,11 +17,6 @@ public abstract class PrometheusMetrics implements Metrics {
   }
 
   @Override
-  public final boolean isEnabled() {
-    return !collectors.isEmpty();
-  }
-
-  @Override
   public final void close() {
     collectors.forEach(registry::unregister);
     collectors.clear();

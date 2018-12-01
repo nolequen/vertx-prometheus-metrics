@@ -27,7 +27,7 @@ public enum MetricsServer {
     return (registry, format) -> {
       router.route(METRICS_PATH).handler(format.handler(registry));
       return address -> {
-        server.requestHandler(router::accept).listen(address.port(), address.host());
+        server.requestHandler(router).listen(address.port(), address.host());
         log.info("Prometheus metrics server started at " + address);
         return server::close;
       };

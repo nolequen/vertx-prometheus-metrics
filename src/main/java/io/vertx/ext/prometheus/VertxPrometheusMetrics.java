@@ -5,12 +5,8 @@ import io.prometheus.client.Gauge;
 import io.vertx.core.Closeable;
 import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
-import io.vertx.core.datagram.DatagramSocket;
 import io.vertx.core.datagram.DatagramSocketOptions;
-import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.metrics.impl.DummyVertxMetrics;
 import io.vertx.core.net.NetClientOptions;
@@ -28,7 +24,6 @@ import org.jetbrains.annotations.Nullable;
 import static io.vertx.ext.prometheus.MetricsType.*;
 
 public final class VertxPrometheusMetrics extends DummyVertxMetrics {
-  private final @NotNull Vertx vertx;
   private final @NotNull VertxPrometheusOptions options;
   private final @NotNull VerticleMetrics verticleMetrics;
   private final @NotNull TimerMetrics timerMetrics;
@@ -38,8 +33,7 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
 
   private @Nullable Closeable server;
 
-  public VertxPrometheusMetrics(@NotNull Vertx vertx, @NotNull VertxPrometheusOptions options) {
-    this.vertx = vertx;
+  public VertxPrometheusMetrics(@NotNull VertxPrometheusOptions options) {
     this.options = options;
     this.verticleMetrics = options.isEnabled(Verticles) ? new VerticlePrometheusMetrics(options.getRegistry()) : new VerticleDummyMetrics();
     this.timerMetrics = options.isEnabled(Timers) ? new TimerPrometheusMetrics(options.getRegistry()) : new TimerDummyMetrics();
@@ -49,7 +43,7 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
   }
 
   @Override
-  public void eventBusInitialized(@NotNull EventBus bus) {
+  public void vertxCreated(@NotNull Vertx vertx) {
     if (options.isEmbeddedServerEnabled()) {
       server = MetricsServer
           .create(vertx)
@@ -79,61 +73,56 @@ public final class VertxPrometheusMetrics extends DummyVertxMetrics {
   }
 
   @Override
-  public @NotNull EventBusMetrics<?> createMetrics(@NotNull EventBus eventBus) {
+  public @NotNull EventBusMetrics createEventBusMetrics() {
     return options.isEnabled(EventBus)
         ? new EventBusPrometheusMetrics(options.getRegistry())
-        : super.createMetrics(eventBus);
+        : super.createEventBusMetrics();
   }
 
   @Override
-  public @NotNull HttpServerMetrics<?, ?, ?> createMetrics(@NotNull HttpServer httpServer, @NotNull SocketAddress localAddress, @NotNull HttpServerOptions httpServerOptions) {
-    return options.isEnabled(HTTPServer)
-        ? new HTTPServerPrometheusMetrics(options.getRegistry(), localAddress, gauges, counters, histograms)
-        : super.createMetrics(httpServer, localAddress, httpServerOptions);
-  }
-
-  @Override
-  public @NotNull HttpClientMetrics<?, ?, ?, ?, ?> createMetrics(@NotNull HttpClient client, @NotNull HttpClientOptions httpClientOptions) {
+  public @NotNull HttpClientMetrics<?, ?, ?, ?, ?> createHttpClientMetrics(@NotNull HttpClientOptions httpClientOptions) {
     return options.isEnabled(HTTPClient)
         ? new HTTPClientPrometheusMetrics(options.getRegistry(), getLocalAddress(httpClientOptions.getLocalAddress()), gauges, counters, histograms)
-        : super.createMetrics(client, httpClientOptions);
+        : super.createHttpClientMetrics(httpClientOptions);
   }
 
   @Override
-  public @NotNull TCPMetrics<?> createMetrics(@NotNull SocketAddress localAddress, @NotNull NetServerOptions netServerOptions) {
-    return options.isEnabled(NetServer)
-        ? new NetServerPrometheusMetrics(options.getRegistry(), localAddress, gauges, counters)
-        : super.createMetrics(localAddress, netServerOptions);
-  }
-
-  @Override
-  public @NotNull TCPMetrics<?> createMetrics(@NotNull NetClientOptions netClientOptions) {
-    return options.isEnabled(NetClient)
-        ? new NetClientPrometheusMetrics(options.getRegistry(), getLocalAddress(netClientOptions.getLocalAddress()), gauges, counters)
-        : super.createMetrics(netClientOptions);
-  }
-
-  @Override
-  public @NotNull DatagramSocketMetrics createMetrics(@NotNull DatagramSocket socket, @NotNull DatagramSocketOptions datagramSocketOptions) {
+  public @NotNull DatagramSocketMetrics createDatagramSocketMetrics(@NotNull DatagramSocketOptions datagramSocketOptions) {
     return options.isEnabled(DatagramSocket)
         ? new DatagramSocketPrometheusMetrics(options.getRegistry(), counters)
-        : super.createMetrics(socket, datagramSocketOptions);
+        : super.createDatagramSocketMetrics(datagramSocketOptions);
   }
 
   @Override
-  public @NotNull <P> PoolMetrics<?> createMetrics(@NotNull P pool, @NotNull String poolType, @NotNull String poolName, int maxPoolSize) {
+  public @NotNull HttpServerMetrics<?, ?, ?> createHttpServerMetrics(@NotNull HttpServerOptions httpServerOptions, @NotNull SocketAddress localAddress) {
+    return options.isEnabled(HTTPServer)
+        ? new HTTPServerPrometheusMetrics(options.getRegistry(), localAddress, gauges, counters, histograms)
+        : super.createHttpServerMetrics(httpServerOptions, localAddress);
+  }
+
+  @Override
+  public @NotNull PoolMetrics<?> createPoolMetrics(@NotNull String poolType, @NotNull String poolName, int maxPoolSize) {
     return options.isEnabled(Pools)
         ? new PoolPrometheusMetrics(options.getRegistry(), poolType, poolName, maxPoolSize)
-        : super.createMetrics(pool, poolType, poolName, maxPoolSize);
+        : super.createPoolMetrics(poolType, poolName, maxPoolSize);
+  }
+
+  @Override
+  public @NotNull TCPMetrics<?> createNetClientMetrics(@NotNull NetClientOptions netClientOptions) {
+    return options.isEnabled(HTTPClient)
+        ? new NetClientPrometheusMetrics(options.getRegistry(), getLocalAddress(netClientOptions.getLocalAddress()), gauges, counters)
+        : super.createNetClientMetrics(netClientOptions);
+  }
+
+  @Override
+  public @NotNull TCPMetrics<?> createNetServerMetrics(@NotNull NetServerOptions netServerOptions, @NotNull SocketAddress localAddress) {
+    return options.isEnabled(NetServer)
+        ? new NetServerPrometheusMetrics(options.getRegistry(), localAddress, gauges, counters)
+        : super.createNetServerMetrics(netServerOptions, localAddress);
   }
 
   @Override
   public boolean isMetricsEnabled() {
-    return true;
-  }
-
-  @Override
-  public boolean isEnabled() {
     return true;
   }
 
