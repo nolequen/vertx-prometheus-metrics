@@ -11,7 +11,7 @@ import java.net.InetSocketAddress;
 public final class ExternalServerTest extends PrometheusMetricsTestCase {
 
   public ExternalServerTest() {
-    super(o -> o.setEmbeddedServerEnabled(false));
+    super(options -> options.setEmbeddedServerEnabled(false));
   }
 
   @Test
