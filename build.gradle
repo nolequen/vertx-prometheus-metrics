@@ -1,8 +1,8 @@
 group 'su.nlq'
-version '3.5.4'
+version '3.6.0'
 
 ext {
-  vertxVersion = '3.5.4'
+  vertxVersion = '3.6.0'
   prometheusVersion = '0.5.0'
 }
 
@@ -106,5 +106,6 @@ artifacts {
 }
 
 signing {
+  required { gradle.taskGraph.hasTask("uploadArchives") }
   sign configurations.archives
 }

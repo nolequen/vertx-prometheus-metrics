@@ -48,13 +48,7 @@ public final class HTTPServerPrometheusMetrics extends TCPPrometheusMetrics impl
   }
 
   @Override
-  public @Nullable Void upgrade(@NotNull HTTPRequestMetrics.Metric metric, @NotNull ServerWebSocket serverWebSocket) {
-    requests.upgrade(metric);
-    return null;
-  }
-
-  @Override
-  public @Nullable Void connected(@Nullable Void metric, @NotNull ServerWebSocket serverWebSocket) {
+  public @Nullable Void connected(@Nullable Void metric, @Nullable HTTPRequestMetrics.Metric requestMetric, ServerWebSocket serverWebSocket) {
     websockets.increment();
     return metric;
   }

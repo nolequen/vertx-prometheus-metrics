@@ -1,7 +1,7 @@
 package io.vertx.ext.prometheus;
 
-import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.MetricsOptions;
 import io.vertx.core.spi.VertxMetricsFactory;
 import io.vertx.core.spi.metrics.VertxMetrics;
@@ -9,14 +9,20 @@ import org.jetbrains.annotations.NotNull;
 
 public final class VertxPrometheusMetricsFactory implements VertxMetricsFactory {
 
+
   @Override
-  public @NotNull VertxMetrics metrics(@NotNull Vertx vertx, @NotNull VertxOptions vertxOptions) {
-    return new VertxPrometheusMetrics(vertx, asPrometheusOptions(vertxOptions));
+  public VertxMetrics metrics(@NotNull VertxOptions vertxOptions) {
+    return new VertxPrometheusMetrics( asPrometheusOptions(vertxOptions));
   }
 
   @Override
   public @NotNull MetricsOptions newOptions() {
     return new VertxPrometheusOptions();
+  }
+
+  @Override
+  public MetricsOptions newOptions(JsonObject jsonObject) {
+    return new VertxPrometheusOptions(jsonObject);
   }
 
   private static @NotNull VertxPrometheusOptions asPrometheusOptions(@NotNull VertxOptions vertxOptions) {
