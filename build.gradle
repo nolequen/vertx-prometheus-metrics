@@ -2,8 +2,8 @@ group 'su.nlq'
 version '3.6.0'
 
 ext {
-  vertxVersion = '3.6.0'
-  prometheusVersion = '0.5.0'
+  vertxVersion = '3.6.2'
+  prometheusVersion = '0.6.0'
 }
 
 apply plugin: 'java'
