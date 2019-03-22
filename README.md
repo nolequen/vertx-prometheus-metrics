@@ -1,5 +1,8 @@
-# vertx-prometheus-metrics
+# DEPRECATED
 
+The project is no longer supported, please consider using [Vert.x Micrometer Metrics](https://vertx.io/docs/vertx-micrometer-metrics/java/#_prometheus) instead.
+
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
 [![Build Status](https://img.shields.io/travis/nolequen/vertx-prometheus-metrics.svg?branch=master)](https://travis-ci.org/nolequen/vertx-prometheus-metrics)
 [![Maven Central](https://img.shields.io/maven-central/v/su.nlq/vertx-prometheus-metrics.svg)](https://maven-badges.herokuapp.com/maven-central/su.nlq/vertx-prometheus-metrics)
 [![Codecov](https://codecov.io/gh/nolequen/vertx-prometheus-metrics/branch/master/graph/badge.svg)](https://codecov.io/gh/nolequen/vertx-prometheus-metrics)
